@@ -1,15 +1,34 @@
+/*
+* File imported in the login.html.
+* Adds functionality to the login view.
+* */
 
-console.log('hello');
+import User from "../../models/user.js";
 
+/*
+* Function that executes when the file is imported in login.html
+* */
 $(function () {
-    console.log('hello');
+    onSubmit();
+});
+
+
+/*
+* Adds the functionality to the form of creating a new user when is submitted.
+* */
+function onSubmit() {
     $('form').submit(function () {
         const input = $('#nickname').val();
         createUser(input);
         return false;
     });
-});
+}
 
+/*
+* Make a post to '/login'. It attaches to the body an user with the nickname specified in the parameters of the
+* function.
+* If the post fails it will show an error in the html specifying the error.
+* */
 function createUser(nickname) {
     $.ajax({
         type: "POST",
@@ -17,10 +36,16 @@ function createUser(nickname) {
             request.setRequestHeader("Content-Type", "application/json");
         },
         url: "/login",
-        data: JSON.stringify({nickname: nickname}),
+        data: JSON.stringify(new User(nickname)),
         processData: false,
         success: function(msg) {
-            this.$router.push('/login');
+            const user = {user: msg};
+            document.cookie = JSON.stringify(user);
+            window.location.href = '/' ;
+        },
+        error: function (xhr) {
+            if(xhr.status === 409) $('#nickname-repeated')[0].style['display'] = 'inherit';
+            else $('#error')[0].style['display'] = 'inherit';
         }
     });
 }

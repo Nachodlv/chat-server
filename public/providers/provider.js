@@ -1,4 +1,4 @@
-export class Provider {
+class Provider {
     constructor() {
         this.models = [];
         this.id = 0;
@@ -15,10 +15,10 @@ export class Provider {
     * Assign an id to the model and adds it to the model array. It returns the id assigned.
     * */
     createModel(model) {
-        model.id = id;
-        id++;
+        model.id = this.id;
+        this.id++;
         this.models.push(model);
-        return id;
+        return model;
     }
 
     /*
@@ -28,3 +28,5 @@ export class Provider {
         this.models = this.models.filter(m => m.id !== id);
     }
 }
+
+module.exports = Provider;

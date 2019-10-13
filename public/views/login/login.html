@@ -1,3 +1,10 @@
+<!--
+Login view
+It contains an input for the user to choose a nickname.
+If the input is empty the form can not be submitted.
+If the nickname is already in use by another user, an error will appear.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +26,7 @@
                         <label for="nickname" class="sr-only">Nickname</label>
                         <input type="text" class="form-control" id="nickname" value="" placeholder="Nickname" required>
                         <div class="invalid-tooltip" id="nickname-repeated">
-                            The username is in use.
+                            The username is already in use.
                         </div>
                         <div class="invalid-tooltip" id="error">
                             An error has occurred. Please try again later.
@@ -43,8 +50,9 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-<script src="../../models/user.js"></script>
-<script src="login.js"></script>
+<script src="../../models/user.js" type="module"></script>
+<script src="../../utils/navigator.js" type="module"></script>
+<script src="login.js" type="module"></script>
 
 </body>
 </html>
