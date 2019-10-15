@@ -11,9 +11,20 @@ app.use(express.static(__dirname + '/frontend/'));
 app.use(express.static(__dirname + '/frontend/views/'));
 
 const Provider = require('./backend/providers/provider.js');
+const User = require('./backend/models/user.js');
 const userProvider = new Provider();
+const roomProvider = new Provider();
 const Message = require('./backend/models/message.js');
+const ChatRoom = require('./backend/models/chat_room.js');
+const chatRoom = new ChatRoom('123', 0);
+roomProvider.createModel(chatRoom);
+const nacho = new User('Nacho');
+nacho.chatRooms.push(chatRoom);
+userProvider.createModel(nacho);
+
 const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname);
+const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, __dirname);
+
 const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message);
 const onlineWs = new (require('./backend/websockets/online_ws'))(io, userProvider, chatWs, Message);
 

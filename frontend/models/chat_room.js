@@ -1,4 +1,3 @@
-import User from "./user";
 
 export class ChatRoom {
     name: string;
@@ -10,8 +9,8 @@ export class ChatRoom {
         this.name = name;
         this.messages = [];
         this.ownerId = ownerId;
-        this.id = id;
         this.users = [];
+        this.id = undefined;
     }
 
 }

@@ -1,21 +1,21 @@
 export class Message {
     text: string;
     userName: string;
-    messageType: MessageType;
     timeStamp: Date;
+    messageType: string;
 
-    constructor(text: string, userName: string, messageType: MessageType = MessageType.UserMessage,
-                timeStamp: Date = Date.now()) {
+    static MessageType ={
+        ServerMessage: 'ServerMessage',
+        ChatInvite: 'ChatInvite',
+        UserMessage: 'UserMessage',
+        Multimedia: 'Multimedia'
+    };
+
+    constructor(text: string, userName: string, messageType: string,
+                timeStamp: Date = new Date()) {
         this.text = text;
         this.userName = userName;
         this.messageType = messageType;
         this.timeStamp = timeStamp;
     }
 }
-
-export const MessageType = {
-    ServerMessage: 'ServerMessage',
-    ChatInvite: 'ChatInvite',
-    UserMessage: 'UserMessage',
-    Multimedia: 'Multimedia'
-};

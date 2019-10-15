@@ -1,6 +1,5 @@
-import User from "../../frontend/models/user";
 
-export class ChatRoom {
+class ChatRoom {
     name: string;
     message: string[];
     id: number;
@@ -10,8 +9,9 @@ export class ChatRoom {
         this.name = name;
         this.messages = [];
         this.ownerId = ownerId;
-        this.id = id;
         this.users = [];
     }
 
 }
+
+module .exports = ChatRoom;

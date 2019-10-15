@@ -1,6 +1,7 @@
 /*
-*
+* Web socket to check if an user is online or offline.
 * */
+
 module.exports = class OnlineWebSocket {
     userProvider: Provider;
     chatWebSocket: ChatWebSocket;
@@ -57,7 +58,7 @@ module.exports = class OnlineWebSocket {
     * */
     sendMessageToAllChatRooms(message: string, chatRooms: ChatRoom[]) {
         chatRooms.forEach(chat =>
-            this.chatWebSocket.sendMessageToChat(chat, new this.Message(message)));
+            this.chatWebSocket.sendMessageToChat(chat, new this.Message(message, Message.MessageType.ServerMessage)));
     }
 
 };

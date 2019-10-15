@@ -1,11 +1,13 @@
 /*
 * Class for the user that interacts with application.
 * */
+// import {ChatRoom} from "./chat_room";
+
 export default class User {
     name: string;
     online: boolean;
     id: number;
-    chatRooms: number[];
+    chatRooms: ChatRoom[];
 
     constructor(name: string) {
         this.name = name;
