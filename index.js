@@ -12,10 +12,13 @@ app.use(express.static(__dirname + '/frontend/views/'));
 
 const Provider = require('./backend/providers/provider.js');
 const User = require('./backend/models/user.js');
+const Message = require('./backend/models/message.js');
+const MessageType = require('./backend/models/message_type.js');
+const ChatRoom = require('./backend/models/chat_room.js');
+
+// INITIALIZATIONS
 const userProvider = new Provider();
 const roomProvider = new Provider();
-const Message = require('./backend/models/message.js');
-const ChatRoom = require('./backend/models/chat_room.js');
 const chatRoom = new ChatRoom('123', 0);
 roomProvider.createModel(chatRoom);
 const nacho = new User('Nacho');
@@ -25,8 +28,8 @@ userProvider.createModel(nacho);
 const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname);
 const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, __dirname);
 
-const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message);
-const onlineWs = new (require('./backend/websockets/online_ws'))(io, userProvider, chatWs, Message);
+const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider);
+const onlineWs = new (require('./backend/websockets/online_ws'))(io, userProvider, chatWs, Message, MessageType);
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/frontend/views/chat/index.html');

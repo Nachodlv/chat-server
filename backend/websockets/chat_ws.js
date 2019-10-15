@@ -8,7 +8,8 @@ class ChatWebSocket {
 
     constructor(io, Message: Message, chatRoomProvider: Provider) {
         this.Message = Message;
-        this.assignCallbacks(io.of('/chat-room'));
+        this.namespace = io.of('/chat-room');
+        this.assignCallbacks();
         this.chatRoomProvider = chatRoomProvider;
     }
 
@@ -17,9 +18,10 @@ class ChatWebSocket {
     * Retrieves the room id in the socket handshake provided by the client connecting.
     * If the user does not exists the callback is ended.
     * */
-    assignCallbacks(namespace) {
-        namespace.on('connection', (socket) => {
+    assignCallbacks() {
+        this.namespace.on('connection', (socket) => {
             const roomId: string = socket.handshake.query['roomId'];
+            if(!roomId) return;
             const room = this.chatRoomProvider.getModel(Number(roomId));
             socket.join(roomId);
             console.log('se conecto a la habitacion con id: ' + roomId);

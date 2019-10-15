@@ -6,11 +6,13 @@ module.exports = class OnlineWebSocket {
     userProvider: Provider;
     chatWebSocket: ChatWebSocket;
     Message: Message;
+    MessageType: MessageType;
 
-    constructor(io, userProvider: Provider, chatWebSocket: ChatWebSocket, Message: Message) {
+    constructor(io, userProvider: Provider, chatWebSocket: ChatWebSocket, Message: Message, MessageType: MessageType) {
         this.userProvider = userProvider;
         this.chatWebSocket = chatWebSocket;
         this.Message = Message;
+        this.MessageType = MessageType;
         this.assignCallbacks(io);
     }
 
@@ -58,7 +60,7 @@ module.exports = class OnlineWebSocket {
     * */
     sendMessageToAllChatRooms(message: string, chatRooms: ChatRoom[]) {
         chatRooms.forEach(chat =>
-            this.chatWebSocket.sendMessageToChat(chat, new this.Message(message, Message.MessageType.ServerMessage)));
+            this.chatWebSocket.sendMessageToChat(chat, new this.Message(message, this.MessageType.ServerMessage)));
     }
 
 };
