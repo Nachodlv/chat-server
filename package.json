@@ -8,7 +8,7 @@
     "socket.io": "^1.7.4"
   },
   "scripts": {
-    "start": "flow-remove-types ./ -d ./lib/ --all --pretty; node lib/index.js",
+    "start": "flow-remove-types ./ -d ./lib/ --all -x .html,.css,.js; node lib/index.js",
     "flow": "flow",
     "flow:check": "flow check ./",
     "flow:build": "flow-remove-types ./ -d ./lib/ --all --pretty"
