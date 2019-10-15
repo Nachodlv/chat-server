@@ -22,6 +22,11 @@ form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 
     background: lightgreen;
     margin-left: auto;
 }
+#messages .author-name {
+    font-weight: bold;
+    padding-bottom: 5px;
+    color: brown;
+}
 #messages .server {
     max-width: unset;
     width: fit-content;
