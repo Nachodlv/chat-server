@@ -30,6 +30,7 @@ form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 
 #messages .server {
     max-width: unset;
     width: fit-content;
+    width: -moz-fit-content;
     background: white;
     margin: 0 auto;
     color: grey;

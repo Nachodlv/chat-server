@@ -41,9 +41,10 @@ function onSubmit(socket, user, roomId) {
 function onMessageReceived(socket, user) {
     socket.on('chat message', function(msgStr){
         const msg: Message = JSON.parse(msgStr);
+        debugger;
         if (msg.messageType === MessageType.ServerMessage) {
             $('#messages').append($('<li>').append($('<div class="msg-container server">')
-                .append($('<p>').text(`${msg.text} (${msg.timeStamp.toLocaleTimeString('it-IT')})`))));
+                .append($('<p>').text(`${msg.text} (${new Date(msg.timeStamp).toLocaleTimeString('it-IT')})`))));
         } else if(msg.messageType === MessageType.UserMessage) {
             const isAuthor = msg.userName === user.name;
             $('#messages').append($('<li>')
@@ -51,7 +52,7 @@ function onMessageReceived(socket, user) {
                     const node = $(isAuthor ? '<div class="msg-container author">' : '<div class="msg-container">');
                     if (!isAuthor) node.append($('<p class="author-name">').text(msg.userName));
                     node.append($('<p>').text(msg.text))
-                        .append($('<p class="time">').text(msg.timeStamp)); //FIXME creo q en firefox no funciona
+                        .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
                     return node;
                 }));
         }
