@@ -1,7 +1,7 @@
 class Provider {
     constructor() {
         this.models = [];
-        this.id = 0;
+        this.id = 1;
     }
 
     /*
