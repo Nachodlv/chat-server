@@ -13,7 +13,7 @@ module.exports = class Message {
     }
 };
 
-export const MessageType = {
+const MessageType = {
     ServerMessage: 'ServerMessage',
     ChatInvite: 'ChatInvite',
     UserMessage: 'UserMessage',

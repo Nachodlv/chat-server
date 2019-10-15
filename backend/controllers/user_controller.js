@@ -3,9 +3,10 @@
 * */
 class UserController {
     dirname: string;
-    constructor(app, Provider, dirname: string) {
+    userProvider: Provider;
+    constructor(app, userProvider: Provider, dirname: string) {
         this.app = app;
-        this.userProvider = new Provider();
+        this.userProvider = userProvider;
         this.dirname = dirname;
         this.loginView();
         this.newUser();

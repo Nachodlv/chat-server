@@ -7,7 +7,7 @@ class Provider {
     /*
     * Returns the model that matches the id. If no model is found, it returns undefined
     * */
-    getModel(id) {
+    getModel(id: number) {
         return this.models.find(model => model.id === id);
     }
 
