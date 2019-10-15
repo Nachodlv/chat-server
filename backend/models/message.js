@@ -1,11 +1,17 @@
-export class Message {
-    constructor(text, userName, messageType = MessageType.UserMessage, timeStamp = Date.now()) {
+module.exports = class Message {
+    text: string;
+    userName: string;
+    messageType: MessageType;
+    timeStamp: Date;
+
+    constructor(text: string, userName: string, messageType: MessageType = MessageType.UserMessage,
+                timeStamp: Date = Date.now()) {
         this.text = text;
         this.userName = userName;
         this.messageType = messageType;
         this.timeStamp = timeStamp;
     }
-}
+};
 
 export const MessageType = {
     ServerMessage: 'ServerMessage',

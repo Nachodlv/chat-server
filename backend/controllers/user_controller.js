@@ -2,7 +2,8 @@
 * Provides the routes for the login view and the ABM for the user
 * */
 class UserController {
-    constructor(app, Provider, dirname) {
+    dirname: string;
+    constructor(app, Provider, dirname: string) {
         this.app = app;
         this.userProvider = new Provider();
         this.dirname = dirname;

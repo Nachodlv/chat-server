@@ -16,7 +16,7 @@ $(function () {
 /*
 * Adds the functionality to the form of creating a new user when is submitted.
 * */
-function onSubmit() {
+function onSubmit(): void {
     $('form').submit(function () {
         const input = $('#nickname').val();
         createUser(input);
@@ -29,7 +29,7 @@ function onSubmit() {
 * function.
 * If the post fails it will show an error in the html specifying the error.
 * */
-function createUser(nickname) {
+function createUser(nickname): void {
     $.ajax({
         type: "POST",
         beforeSend: function(request) {
