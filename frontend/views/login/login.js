@@ -4,6 +4,7 @@
 * */
 
 import User from "../../models/user.js";
+import {CookieService} from "../../services/cookie-service.js";
 
 /*
 * Function that executes when the file is imported in login.html
@@ -39,9 +40,8 @@ function createUser(nickname): void {
         data: JSON.stringify(new User(nickname)),
         processData: false,
         success: function(msg) {
-            const user = {user: msg};
-            document.cookie = JSON.stringify(user);
-            window.location.href = '/' ;
+            CookieService.setCookie('user', msg, 1);
+            window.location.href = '/';
         },
         error: function (xhr) {
             if(xhr.status === 409) $('#nickname-repeated')[0].style['display'] = 'inherit';
