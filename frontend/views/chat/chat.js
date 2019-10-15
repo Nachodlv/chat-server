@@ -1,6 +1,7 @@
 import {CookieService} from "../../services/cookie-service.js";
 import User from "../../models/user.js";
 import {Message} from "../../models/message.js";
+import {MessageType} from "../../models/message.js";
 
 /*
 * Function that executes when the file is imported in index.html
@@ -25,7 +26,8 @@ function onSubmit(socket, user, roomId) {
     $('form').submit(function(){
         const input = $('#m');
         // socket.emit('chat message', input.val());
-        socket.emit('chat message', JSON.stringify(new Message(input.val(), user.name, Message.MessageType.UserMessage, new Date(), roomId)));
+        socket.emit('chat message', JSON.stringify(new Message(input.val(), user.name, MessageType.UserMessage,
+            new Date(), roomId)));
         input.val('');
         return false;
     });
@@ -39,17 +41,17 @@ function onSubmit(socket, user, roomId) {
 function onMessageReceived(socket, user) {
     socket.on('chat message', function(msgStr){
         const msg: Message = JSON.parse(msgStr);
-        if (msg.messageType === Message.MessageType.ServerMessage) {
+        if (msg.messageType === MessageType.ServerMessage) {
             $('#messages').append($('<li>').append($('<div class="msg-container server">')
                 .append($('<p>').text(`${msg.text} (${msg.timeStamp.toLocaleTimeString('it-IT')})`))));
-        } else if(msg.messageType === Message.MessageType.UserMessage) {
+        } else if(msg.messageType === MessageType.UserMessage) {
             const isAuthor = msg.userName === user.name;
             $('#messages').append($('<li>')
                 .append( () => {
                     const node = $(isAuthor ? '<div class="msg-container author">' : '<div class="msg-container">');
                     if (!isAuthor) node.append($('<p class="author-name">').text(msg.userName));
                     node.append($('<p>').text(msg.text))
-                        .append($('<p class="time">').text(msg.timeStamp.toLocaleTimeString('it-IT')));
+                        .append($('<p class="time">').text(msg.timeStamp)); //FIXME creo q en firefox no funciona
                     return node;
                 }));
         }

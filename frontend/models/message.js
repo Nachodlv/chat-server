@@ -5,13 +5,6 @@ export class Message {
     messageType: string;
     roomId: number;
 
-    static MessageType ={
-        ServerMessage: 'ServerMessage',
-        ChatInvite: 'ChatInvite',
-        UserMessage: 'UserMessage',
-        Multimedia: 'Multimedia'
-    };
-
     constructor(text: string, userName: string, messageType: string,
                 timeStamp: Date = new Date(), roomId: number) {
         this.text = text;
@@ -21,3 +14,10 @@ export class Message {
         this.roomId = roomId;
     }
 }
+
+export const MessageType = {
+    ServerMessage: 'ServerMessage',
+    ChatInvite: 'ChatInvite',
+    UserMessage: 'UserMessage',
+    Multimedia: 'Multimedia'
+};

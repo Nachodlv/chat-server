@@ -26,7 +26,7 @@ class ChatWebSocket {
         });
     }
 
-    onJoin(socket, room: ChatRoom) {
+    onJoin(socket) {
         socket.on('join', (roomId) => {
             socket.join(roomId);
             console.log('se conecto a la habitacion con id: ' + roomId);
@@ -41,15 +41,15 @@ class ChatWebSocket {
             const message: Message = JSON.parse(msg);
             const room: ChatRoom = this.chatRoomProvider.getModel(message.roomId);
             room.messages.push(message);
-            // socket.to(message.roomId).emit('chat message', msg);
-            socket.emit('chat message', msg);
+            socket.to(message.roomId).emit('chat message', msg);
+            // socket.emit('chat message', msg);
         });
     }
 
     /*
     * When a server message is send it emits it.
     * */
-    onServerMessage(socket, room: ChatRoom) {
+    onServerMessage(socket) {
         socket.on('server message', (msg) => {
             const message: Message = JSON.parse(msg);
             socket.to(message.roomId).emit(msg);
