@@ -20,25 +20,28 @@ class ChatWebSocket {
     * */
     assignCallbacks() {
         this.namespace.on('connection', (socket) => {
-            const roomId: string = socket.handshake.query['roomId'];
-            if(!roomId) return;
-            const room = this.chatRoomProvider.getModel(Number(roomId));
+            this.onJoin(socket);
+            this.onMessage(socket);
+            this.onServerMessage(socket);
+        });
+    }
+
+    onJoin(socket, room: ChatRoom) {
+        socket.on('join', (roomId) => {
             socket.join(roomId);
             console.log('se conecto a la habitacion con id: ' + roomId);
-            if (!room) return;
-            this.onMessage(socket, room);
-            this.onServerMessage(socket, room);
-        });
+        })
     }
 
     /*
     * When a chat message is send it attaches the message to the chat group in the provider and emits it.
     * */
-    onMessage(socket, room: ChatRoom) {
+    onMessage(socket) {
         socket.on('chat message', (msg) => {
             const message: Message = JSON.parse(msg);
+            const room = this.chatRoomProvider.getModel(message.roomId);
             room.message.push(message);
-            socket.to(room.id).emit(msg);
+            socket.to(message.roomId).emit(msg);
         });
     }
 
@@ -47,7 +50,8 @@ class ChatWebSocket {
     * */
     onServerMessage(socket, room: ChatRoom) {
         socket.on('server message', (msg) => {
-            socket.to(room.id).emit(msg);
+            const message: Message = JSON.parse(msg);
+            socket.to(message.roomId).emit(msg);
         })
     }
 

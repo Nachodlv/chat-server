@@ -3,13 +3,15 @@ module.exports = class Message {
     userName: string;
     messageType: MessageType;
     timeStamp: Date;
+    roomId: number;
 
     constructor(text: string, userName: string, messageType: MessageType = MessageType.UserMessage,
-                timeStamp: Date = Date.now()) {
+                timeStamp: Date = Date.now(), roomId: number) {
         this.text = text;
         this.userName = userName;
         this.messageType = messageType;
         this.timeStamp = timeStamp;
+        this.roomId = roomId;
     }
 };
 
