@@ -12,7 +12,12 @@ $(function () {
     const socket = io('/chat-room');
     const roomId = 1;
     socket.emit('join', roomId);
-    const user: User = JSON.parse(CookieService.getCookie('user'));
+    const cookie = CookieService.getCookie('user');
+    if (cookie === '') {
+        window.location.href = '/login';
+        return false
+    }
+    const user: User = JSON.parse(cookie);
     onSubmit(socket, user, roomId);
     onMessageReceived(socket, user);
 });
@@ -41,7 +46,6 @@ function onSubmit(socket, user, roomId) {
 function onMessageReceived(socket, user) {
     socket.on('chat message', function(msgStr){
         const msg: Message = JSON.parse(msgStr);
-        debugger;
         if (msg.messageType === MessageType.ServerMessage) {
             $('#messages').append($('<li>').append($('<div class="msg-container server">')
                 .append($('<p>').text(`${msg.text} (${new Date(msg.timeStamp).toLocaleTimeString('it-IT')})`))));
@@ -59,3 +63,5 @@ function onMessageReceived(socket, user) {
         window.scrollTo(0, document.body.scrollHeight);
     });
 }
+
+// TODO get All previous messages upon joining, How do I access provider ???
