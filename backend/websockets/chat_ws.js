@@ -42,6 +42,7 @@ class ChatWebSocket {
             const room: ChatRoom = this.chatRoomProvider.getModel(message.roomId);
             room.messages.push(message);
             socket.to(message.roomId).emit('chat message', msg);
+            console.log(message.userName + "(" + message.roomId +"): " + message.text)
             // socket.emit('chat message', msg);
         });
     }

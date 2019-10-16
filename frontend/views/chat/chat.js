@@ -9,17 +9,19 @@ import {MessageType} from "../../models/message.js";
 * It initializes the form submit and message received listeners.
 * */
 $(function () {
-    const socket = io('/chat-room');
-    const roomId = 1;
-    socket.emit('join', roomId);
     const cookie = CookieService.getCookie('user');
     if (cookie === '') {
         window.location.href = '/login';
         return false
     }
     const user: User = JSON.parse(cookie);
+    io('/', {query: "userId=" + user.id});
+    const socket = io('/chat-room');
+    const roomId = 1;
+    socket.emit('join', roomId);
     onSubmit(socket, user, roomId);
     onMessageReceived(socket, user);
+    onServerMessage(socket);
 });
 
 /*
@@ -28,11 +30,12 @@ $(function () {
 * The Message object has some added information used to route and display the message.
 * */
 function onSubmit(socket, user, roomId) {
-    $('form').submit(function(){
+    $('form').submit(() => {
         const input = $('#m');
         // socket.emit('chat message', input.val());
-        socket.emit('chat message', JSON.stringify(new Message(input.val(), user.name, MessageType.UserMessage,
-            new Date(), roomId)));
+        const message = new Message(input.val(), user.name, MessageType.UserMessage, new Date(), roomId);
+        appendUserMessage(message, true);
+        socket.emit('chat message', JSON.stringify(message));
         input.val('');
         return false;
     });
@@ -44,24 +47,35 @@ function onSubmit(socket, user, roomId) {
 * The way the message is presented changes according to the MessageType and the author of the message.
 * */
 function onMessageReceived(socket, user) {
-    socket.on('chat message', function(msgStr){
+    socket.on('chat message', (msgStr) => {
         const msg: Message = JSON.parse(msgStr);
-        if (msg.messageType === MessageType.ServerMessage) {
-            $('#messages').append($('<li>').append($('<div class="msg-container server">')
-                .append($('<p>').text(`${msg.text} (${new Date(msg.timeStamp).toLocaleTimeString('it-IT')})`))));
-        } else if(msg.messageType === MessageType.UserMessage) {
-            const isAuthor = msg.userName === user.name;
-            $('#messages').append($('<li>')
-                .append( () => {
-                    const node = $(isAuthor ? '<div class="msg-container author">' : '<div class="msg-container">');
-                    if (!isAuthor) node.append($('<p class="author-name">').text(msg.userName));
-                    node.append($('<p>').text(msg.text))
-                        .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
-                    return node;
-                }));
-        }
-        window.scrollTo(0, document.body.scrollHeight);
+        appendUserMessage(msg, msg.userName === user.name);
     });
+}
+
+function appendUserMessage(msg: Message, isAuthor: boolean) {
+    $('#messages').append($('<li>')
+        .append( () => {
+            const node = $(isAuthor ? '<div class="msg-container author">' : '<div class="msg-container">');
+            if (!isAuthor) node.append($('<p class="author-name">').text(msg.userName));
+            node.append($('<p>').text(msg.text))
+                .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
+            return node;
+        }));
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function onServerMessage(socket) {
+    socket.on('server message', (msgStr) => {
+        const msg: Message = JSON.parse(msgStr);
+        appendServerMessage(msg);
+    });
+}
+
+function appendServerMessage(msg: Message) {
+    $('#messages').append($('<li>').append($('<div class="msg-container server">')
+        .append($('<p>').text(`${msg.text} (${new Date(msg.timeStamp).toLocaleTimeString('it-IT')})`))));
+    window.scrollTo(0, document.body.scrollHeight);
 }
 
 // TODO get All previous messages upon joining, How do I access provider ???
