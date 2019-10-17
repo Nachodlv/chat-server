@@ -16,7 +16,7 @@ class ChatRoomController {
     * Returns the view of the index.html
     * */
     chatView() {
-       this.app.get('/chat-view', (req, res) =>
+       this.app.get('/', (req, res) =>
            res.sendFile(this.dirname + '/frontend/views/chat/index.html')
        );
     }

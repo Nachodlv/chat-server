@@ -29,7 +29,6 @@ class ChatWebSocket {
     onJoin(socket) {
         socket.on('join', (roomId) => {
             socket.join(roomId);
-            console.log('se conecto a la habitacion con id: ' + roomId);
         })
     }
 
@@ -57,12 +56,7 @@ class ChatWebSocket {
         })
     }
 
-    /*
-    * Emits a message to the chat room specified.
-    * */
-    sendMessageToChat(chat: ChatRoom, message: Message) {
-        this.namespace.to(chat.id).emit(JSON.stringify(message))
-    }
+
 }
 
 module.exports = ChatWebSocket;

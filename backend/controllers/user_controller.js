@@ -40,6 +40,7 @@ class UserController {
             res.send(JSON.stringify(newUser));
         });
     }
+
 }
 
 module.exports = UserController;

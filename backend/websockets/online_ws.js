@@ -13,7 +13,8 @@ module.exports = class OnlineWebSocket {
         this.chatWebSocket = chatWebSocket;
         this.Message = Message;
         this.MessageType = MessageType;
-        this.assignCallbacks(io);
+        this.namespace = io.of('/chat-room');
+        this.assignCallbacks();
     }
 
     /*
@@ -21,8 +22,8 @@ module.exports = class OnlineWebSocket {
     * Retrieves the user id in the socket handshake provided by the client connecting.
     * If the user does not exists the callback is ended.
     * */
-    assignCallbacks(io) {
-        io.on('connection', (socket) => {
+    assignCallbacks() {
+        this.namespace.on('connection', (socket) => {
             const userId: number = Number(socket.handshake.query['userId']);
             const user: User = this.userProvider.getModel(userId);
             if (!user) return;
@@ -60,7 +61,14 @@ module.exports = class OnlineWebSocket {
     * */
     sendMessageToAllChatRooms(message: string, chatRooms: ChatRoom[]) {
         chatRooms.forEach(chat =>
-            this.chatWebSocket.sendMessageToChat(chat, new this.Message(message, this.MessageType.ServerMessage)));
+            this.sendMessageToChat(chat, new this.Message(message, this.MessageType.ServerMessage)));
+    }
+
+    /*
+    * Emits a message to the chat room specified.
+    * */
+    sendMessageToChat(chat: ChatRoom, message: Message) {
+        this.namespace.to(chat.id).emit('server message', JSON.stringify(message));
     }
 
 };

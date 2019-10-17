@@ -22,8 +22,11 @@ const roomProvider = new Provider();
 const chatRoom = new ChatRoom('123', 0);
 roomProvider.createModel(chatRoom);
 const nacho = new User('Nacho');
+const gianni = new User('Gianni');
+gianni.chatRooms.push(chatRoom);
 nacho.chatRooms.push(chatRoom);
 userProvider.createModel(nacho);
+userProvider.createModel(gianni);
 
 const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname);
 const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, __dirname);
@@ -31,13 +34,6 @@ const chatRoomController = new (require('./backend/controllers/chat_room_control
 const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider);
 const onlineWs = new (require('./backend/websockets/online_ws'))(io, userProvider, chatWs, Message, MessageType);
 
-app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/frontend/views/chat/index.html');
-});
-
-app.get('/chat-list', function (req, res) {
-   res.sendFile(__dirname + '/frontend/views/chat-list/chat_list.html')
-});
 
 // io.on('connection', function (socket) {
 //     socket.on('chat message', function (msg) {

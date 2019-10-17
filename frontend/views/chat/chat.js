@@ -17,7 +17,7 @@ $(function () {
     const user: User = JSON.parse(cookie);
     io('/', {query: "userId=" + user.id});
     const socket = io('/chat-room');
-    const roomId = 1;
+    const roomId = 0;
     socket.emit('join', roomId);
     onSubmit(socket, user, roomId);
     onMessageReceived(socket, user);
