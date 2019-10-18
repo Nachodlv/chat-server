@@ -5,31 +5,47 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel = "stylesheet" type = "text/css" href = "../chat/index.css" />
+    <link rel = "stylesheet" type = "text/css" href = "../chat/chat-list/chat_list.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
   <body>
-    <ul id="messages">
-        <li>
-            <div class="msg-container author">
-                <p>Default message</p>
-                <p class="time">16:30:10</p>
+  <div class="row">
+      <div class="col">
+          <div id="chat-title" class="container d-flex">
+            <div class="row justify-content-between align-self-center w-100">
+                <div class="col-4"><h4>Chat group name</h4></div>
+                <div id="chat-list"></div>
             </div>
-        </li>
-        <li>
-            <div class="msg-container">
-                <p class="author-name">Gianni</p>
-                <p>Default message</p>
-                <p class="time">16:30:20</p>
-            </div>
-        </li>
-        <li>
-            <div class="msg-container server">
-                <p>A user has joined the channel (16:30:20)</p>
-            </div>
-        </li>
-    </ul>
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
+          </div>
+      </div>
+      <div class="w-100"></div>
+      <div class="col">
+          <ul id="messages">
+              <li>
+                  <div class="msg-container author">
+                      <p>Default message</p>
+                      <p class="time">16:30:10</p>
+                  </div>
+              </li>
+              <li>
+                  <div class="msg-container">
+                      <p class="author-name">Gianni</p>
+                      <p>Default message</p>
+                      <p class="time">16:30:20</p>
+                  </div>
+              </li>
+              <li>
+                  <div class="msg-container server">
+                      <p>A user has joined the channel (16:30:20)</p>
+                  </div>
+              </li>
+          </ul>
+          <form action="">
+              <input id="m" autocomplete="off" /><button>Send</button>
+          </form>
+      </div>
+  </div>
+
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <!--Bootstrap 4 scripts-->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -43,6 +59,6 @@
             crossorigin="anonymous"></script>
     <!--END / Bootstrap 4 scripts-->
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="../chat/chat.js" type="module"></script>
+  <script src="../chat/chat.js" type="module"></script>
   </body>
 </html>

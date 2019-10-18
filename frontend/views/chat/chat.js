@@ -2,12 +2,19 @@ import {AuthService} from "../../services/auth-service.js";
 import User from "../../models/user.js";
 import {Message} from "../../models/message.js";
 import {MessageType} from "../../models/message.js";
+import {addChatList, onUserStatusChange} from "./chat-list/chat_list.js";
 
 /*
 * Function that executes when the file is imported in index.html
 * Check if the user is logged in
 * */
 $(function () {
+    const user = new User("jorge");
+    addChatList([user]);
+    setTimeout(() => {
+        user.online = true;
+        onUserStatusChange(user);
+    }, 10000);
     AuthService.isAuthorized(initializeSockets, () => {
         window.location.href = '/login';
         return false
@@ -47,9 +54,7 @@ function onSubmit(socket, user, roomId) {
 }
 
 /*
-* Listener that is called when a message is sent to this specific roomId and namespace.
-* It appends a <li> to the html containing the message.
-* The way the message is presented changes according to the MessageType and the author of the message.
+* Listener that is called when a user message is sent to this specific roomId and namespace.
 * */
 function onMessageReceived(socket, user) {
     socket.on('chat message', (msgStr) => {
@@ -58,6 +63,10 @@ function onMessageReceived(socket, user) {
     });
 }
 
+/*
+* It appends a <li> to the html containing the user message.
+* The way the message is presented changes according to the author of the message.
+* */
 function appendUserMessage(msg: Message, isAuthor: boolean) {
     $('#messages').append($('<li>')
         .append( () => {
@@ -70,6 +79,9 @@ function appendUserMessage(msg: Message, isAuthor: boolean) {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
+/*
+* Listener that is called when a server message is sent to this specific roomId and namespace.
+* */
 function onServerMessage(socket) {
     socket.on('server message', (msgStr) => {
         const msg: Message = JSON.parse(msgStr);
@@ -77,6 +89,9 @@ function onServerMessage(socket) {
     });
 }
 
+/*
+* It appends a <li> to the html containing the server message.
+* */
 function appendServerMessage(msg: Message) {
     $('#messages').append($('<li>').append($('<div class="msg-container server">')
         .append($('<p>').text(`${msg.text} (${new Date(msg.timeStamp).toLocaleTimeString('it-IT')})`))));

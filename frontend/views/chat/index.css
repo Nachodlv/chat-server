@@ -37,3 +37,19 @@ form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 
 }
 #messages p {margin-bottom: 0;}
 
+.col {
+    padding-right: unset;
+    padding-left: unset;
+}
+
+.row {
+    margin-right: unset;
+    margin-left: unset;
+}
+
+#chat-title {
+    background-color: rgb(130, 224, 255);
+    height: 50px;
+    max-width: unset;
+}
+

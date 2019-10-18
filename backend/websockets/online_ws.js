@@ -59,16 +59,16 @@ module.exports = class OnlineWebSocket {
     /*
     * Iterate over an array of chat room sending them the message provided in the parameters.
     * */
-    sendMessageToAllChatRooms(message: string, chatRooms: ChatRoom[]) {
-        chatRooms.forEach(chat =>
-            this.sendMessageToChat(chat, new this.Message(message, this.MessageType.ServerMessage)));
+    sendMessageToAllChatRooms(message: string, chatRooms: number[]) {
+        chatRooms.forEach(chatId =>
+            this.sendMessageToChat(chatId, new this.Message(message, this.MessageType.ServerMessage)));
     }
 
     /*
     * Emits a message to the chat room specified.
     * */
-    sendMessageToChat(chat: ChatRoom, message: Message) {
-        this.namespace.to(chat.id).emit('server message', JSON.stringify(message));
+    sendMessageToChat(chatRoomId: number, message: Message) {
+        this.namespace.to(chatRoomId).emit('server message', JSON.stringify(message));
     }
 
 };

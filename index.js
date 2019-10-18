@@ -23,8 +23,8 @@ const chatRoom = new ChatRoom('123', 0);
 roomProvider.createModel(chatRoom);
 const nacho = new User('Nacho');
 const gianni = new User('Gianni');
-gianni.chatRooms.push(chatRoom);
-nacho.chatRooms.push(chatRoom);
+gianni.chatRooms.push(0);
+nacho.chatRooms.push(0);
 userProvider.createModel(nacho);
 userProvider.createModel(gianni);
 

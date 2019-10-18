@@ -1,0 +1,15 @@
+.online-icon {
+    font-size: 20px !important;
+}
+
+.dropdown-item {
+    padding: 0 10px 0 10px;
+}
+
+.online {
+    color: #21d121;
+}
+
+.offline {
+    color: red;
+}

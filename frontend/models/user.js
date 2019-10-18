@@ -7,7 +7,7 @@ export default class User {
     name: string;
     online: boolean;
     id: number;
-    chatRooms: ChatRoom[];
+    chatRooms: number[];
 
     constructor(name: string) {
         this.name = name;
