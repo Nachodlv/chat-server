@@ -5,12 +5,16 @@
 
 import User from "../../models/user.js";
 import {CookieService} from "../../services/cookie-service.js";
+import {AuthService} from "../../services/auth-service.js";
 
 /*
 * Function that executes when the file is imported in login.html
+* Check if a user is logged in.
 * */
 $(function () {
-    onSubmit();
+    AuthService.isAuthorized(() => {
+        window.location.href = '/';
+    }, onSubmit)
 });
 
 

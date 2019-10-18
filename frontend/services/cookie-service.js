@@ -8,7 +8,7 @@ export class CookieService {
         window.document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     }
 
-    static getCookie(cname) {
+    static getCookie(cname): string {
         const name = cname + "=";
         const decodedCookie = decodeURIComponent(window.document.cookie);
         const ca = decodedCookie.split(';');

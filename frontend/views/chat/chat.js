@@ -1,20 +1,25 @@
-import {CookieService} from "../../services/cookie-service.js";
+import {AuthService} from "../../services/auth-service.js";
 import User from "../../models/user.js";
 import {Message} from "../../models/message.js";
 import {MessageType} from "../../models/message.js";
 
 /*
 * Function that executes when the file is imported in index.html
+* Check if the user is logged in
+* */
+$(function () {
+    AuthService.isAuthorized(initializeSockets, () => {
+        window.location.href = '/login';
+        return false
+    });
+
+});
+
+/*
 * It initializes the socket at a given namespace and room.
 * It initializes the form submit and message received listeners.
 * */
-$(function () {
-    const cookie = CookieService.getCookie('user');
-    if (cookie === '') {
-        window.location.href = '/login';
-        return false
-    }
-    const user: User = JSON.parse(cookie);
+function initializeSockets(user: User) {
     io('/', {query: "userId=" + user.id});
     const socket = io('/chat-room');
     const roomId = 0;
@@ -22,7 +27,7 @@ $(function () {
     onSubmit(socket, user, roomId);
     onMessageReceived(socket, user);
     onServerMessage(socket);
-});
+}
 
 /*
 * Function that handles the form submission.

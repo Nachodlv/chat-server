@@ -10,6 +10,7 @@ class UserController {
         this.dirname = dirname;
         this.loginView();
         this.newUser();
+        this.getUser();
     }
 
     /*
@@ -38,6 +39,24 @@ class UserController {
             const newUser = this.userProvider.createModel(user);
             res.status(200);
             res.send(JSON.stringify(newUser));
+        });
+    }
+
+    /*
+    * Returns the user with the id provided in the url.
+    * If no user is found, it returns a status code 404.
+    * */
+    getUser() {
+        this.app.get('/user/:userId*', (req, res) => {
+            const userId = Number(req.params['userId']);
+            const user = this.userProvider.getModel(userId);
+            if(user) {
+                res.status(200);
+                res.send(JSON.stringify(user));
+            } else {
+                res.status(404);
+                res.send('No user found with id: ' + userId);
+            }
         });
     }
 
