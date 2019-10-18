@@ -1,6 +1,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font: 13px Helvetica, Arial; }
-form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 65.8vw; }
 form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
 form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
 #messages { list-style-type: none; margin: 0; padding: 0; }
@@ -47,9 +47,24 @@ form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 
     margin-left: unset;
 }
 
-#chat-title {
+.header-title {
     background-color: rgb(130, 224, 255);
     height: 50px;
     max-width: unset;
+    align-items: center;
+}
+
+.header-title h4 {
+    margin-bottom: 0;
+}
+
+.group-add{
+    margin-left: auto;
+    color: darkgreen;
+    font-size: 32px!important;
+}
+
+.clickable{
+    cursor: pointer;
 }
 

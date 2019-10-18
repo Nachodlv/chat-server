@@ -19,13 +19,10 @@ const ChatRoom = require('./backend/models/chat_room.js');
 // INITIALIZATIONS
 const userProvider = new Provider();
 const roomProvider = new Provider();
-const chatRoom = new ChatRoom('123', 0);
+const chatRoom = new ChatRoom('Everyone is invited!', 0);
 roomProvider.createModel(chatRoom);
-const nacho = new User('Nacho');
 const gianni = new User('Gianni');
 gianni.chatRooms.push(0);
-nacho.chatRooms.push(0);
-userProvider.createModel(nacho);
 userProvider.createModel(gianni);
 
 const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname);

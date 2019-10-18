@@ -3,6 +3,10 @@ import User from "../../models/user.js";
 import {Message} from "../../models/message.js";
 import {MessageType} from "../../models/message.js";
 import {addChatList, onUserStatusChange} from "./chat-list/chat_list.js";
+import {getGroupsForUser} from "./group-list/group_list.js";
+import {ChatRoom} from "../../models/chat_room.js";
+
+let loggedUser: User;
 
 /*
 * Function that executes when the file is imported in index.html
@@ -15,7 +19,7 @@ $(function () {
         user.online = true;
         onUserStatusChange(user);
     }, 10000);
-    AuthService.isAuthorized(initializeSockets, () => {
+    AuthService.isAuthorized(init, () => {
         window.location.href = '/login';
         return false
     });
@@ -23,17 +27,34 @@ $(function () {
 });
 
 /*
+* Gets chat rooms for logged user
+* */
+function init(user: User) {
+    loggedUser = user;
+    getGroupsForUser(user);
+}
+
+/*
 * It initializes the socket at a given namespace and room.
 * It initializes the form submit and message received listeners.
 * */
-function initializeSockets(user: User) {
-    io('/', {query: "userId=" + user.id});
+export function onGroupSelected(group) {
+    io('/', {query: "userId=" + loggedUser.id});
     const socket = io('/chat-room');
-    const roomId = 0;
-    socket.emit('join', roomId);
-    onSubmit(socket, user, roomId);
-    onMessageReceived(socket, user);
+    socket.emit('join', group.id);
+    onSubmit(socket, loggedUser, group.id);
+    onMessageReceived(socket, loggedUser);
     onServerMessage(socket);
+    populateHTML(loggedUser, group)
+}
+
+function populateHTML(user: User, group: ChatRoom){
+    $('#chat-group-name').text(group.name);
+    group.messages.forEach(msg => {
+        if (msg.messageType === MessageType.UserMessage) appendUserMessage(msg, msg.userName === user.name);
+        else appendServerMessage(msg) // will be file type message in the future
+        // TODO check for other types ?
+    })
 }
 
 /*
@@ -42,7 +63,7 @@ function initializeSockets(user: User) {
 * The Message object has some added information used to route and display the message.
 * */
 function onSubmit(socket, user, roomId) {
-    $('form').submit(() => {
+    $('#message-form').submit(() => {
         const input = $('#m');
         // socket.emit('chat message', input.val());
         const message = new Message(input.val(), user.name, MessageType.UserMessage, new Date(), roomId);

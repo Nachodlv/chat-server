@@ -1,7 +1,6 @@
-
 export class ChatRoom {
     name: string;
-    messages: string[];
+    messages: Message[];
     id: number;
     users: User[];
 
