@@ -1,9 +1,9 @@
 
 /*
-* Add the html from chat_list.html to the DOM where the function is called.
+* Add the html from user_list.html to the DOM where the function is called.
 * */
 export function addChatList(users: User[] = []) {
-    $.get("./chat/chat-list/chat_list.html", (data) => {
+    $.get("./chat/user-list/user_list.html", (data) => {
         $('#chat-list').html(data);
         users.forEach(addUser);
     });
