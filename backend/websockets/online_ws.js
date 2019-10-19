@@ -4,16 +4,14 @@
 
 module.exports = class OnlineWebSocket {
     userProvider: Provider;
-    chatWebSocket: ChatWebSocket;
     Message: Message;
     MessageType: MessageType;
 
-    constructor(io, userProvider: Provider, chatWebSocket: ChatWebSocket, Message: Message, MessageType: MessageType) {
+    constructor(io, userProvider: Provider, Message: Message, MessageType: MessageType) {
         this.userProvider = userProvider;
-        this.chatWebSocket = chatWebSocket;
         this.Message = Message;
         this.MessageType = MessageType;
-        this.namespace = io.of('/chat-room');
+        this.namespace = io.of('/');
         this.assignCallbacks();
     }
 
@@ -26,6 +24,7 @@ module.exports = class OnlineWebSocket {
         this.namespace.on('connection', (socket) => {
             const userId: number = Number(socket.handshake.query['userId']);
             const user: User = this.userProvider.getModel(userId);
+            this.namespace.join(String(userId));
             if (!user) return;
             this.onConnection(user);
             socket.on('disconnect', () => this.onDisconnect(user));
