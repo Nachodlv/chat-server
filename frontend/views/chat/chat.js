@@ -30,9 +30,13 @@ $(function () {
 * Gets chat rooms for logged user
 * */
 function init(user: User) {
-    debugger;
     loggedUser = user;
     getGroupsForUser(user);
+    const socket = io('/chat-room', {query: "userId=" + loggedUser.id});
+    socket.emit('join', group.id);
+    onSubmit(socket, loggedUser, group.id);
+    onMessageReceived(socket, loggedUser);
+    onServerMessage(socket);
 }
 
 /*
@@ -40,12 +44,6 @@ function init(user: User) {
 * It initializes the form submit and message received listeners.
 * */
 export function onGroupSelected(group) {
-    io('/', {query: "userId=" + loggedUser.id});
-    const socket = io('/chat-room');
-    socket.emit('join', group.id);
-    onSubmit(socket, loggedUser, group.id);
-    onMessageReceived(socket, loggedUser);
-    onServerMessage(socket);
     populateHTML(loggedUser, group)
 }
 
@@ -85,6 +83,7 @@ function onSubmit(socket, user, roomId) {
 * */
 function onMessageReceived(socket, user) {
     socket.on('chat message', (msgStr) => {
+        debugger;
         const msg: Message = JSON.parse(msgStr);
         appendUserMessage(msg, msg.userName === user.name);
     });
