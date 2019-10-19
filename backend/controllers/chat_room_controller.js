@@ -11,6 +11,7 @@ class ChatRoomController {
         this.chatView();
         this.getChatRoom();
         this.getChatRooms();
+        this.newChatRoom()
     }
 
     /*
@@ -59,6 +60,26 @@ class ChatRoomController {
             }
             res.status(200);
             res.send(JSON.stringify(rooms));
+        });
+    }
+
+    /*
+    * Creates a new group.
+    * If it is successful it will return a status code 200.
+    * If the name is already used, it will return a status code 409.
+    * */
+    newChatRoom() {
+        this.app.post('/chat-room', (req, res) => {
+            const room = req.body;
+            const result = this.chatRoomProvider.models.find((model: ChatRoom) => model.name === room.name);
+            if(result) {
+                res.status(409);
+                res.send('Group name already in use');
+                return;
+            }
+            const newRoom = this.chatRoomProvider.createModel(room);
+            res.status(200);
+            res.send(JSON.stringify(newRoom));
         });
     }
 }

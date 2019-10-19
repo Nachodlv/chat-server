@@ -30,6 +30,7 @@ $(function () {
 * Gets chat rooms for logged user
 * */
 function init(user: User) {
+    debugger;
     loggedUser = user;
     getGroupsForUser(user);
 }
@@ -50,6 +51,11 @@ export function onGroupSelected(group) {
 
 function populateHTML(user: User, group: ChatRoom){
     $('#chat-group-name').text(group.name);
+    $('#messages').empty().append('<li>' +
+        '<div class="msg-container server">' +
+        '<p>This is the beginning of the group chat history</p>' +
+        '</div>' +
+        '</li>');
     group.messages.forEach(msg => {
         if (msg.messageType === MessageType.UserMessage) appendUserMessage(msg, msg.userName === user.name);
         else appendServerMessage(msg) // will be file type message in the future

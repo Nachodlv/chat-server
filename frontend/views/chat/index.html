@@ -15,8 +15,10 @@
               <div class=" header-title container d-flex">
                   <h4>Chat rooms</h4>
                   <div class="add-group-container">
-
-                      <i class="material-icons group-add clickable">group_add</i>
+                      <form id="new-group-form" action="">
+                          <input id="g" autocomplete="off" placeholder="New group name..."/>
+                          <i id="new-group-submit" class="material-icons group-add clickable">group_add</i>
+                      </form>
                   </div>
               </div>
               <div id="group-list"></div>
@@ -52,11 +54,6 @@
                                   <p>A user has joined the channel (16:30:20)</p>
                               </div>
                           </li>-->
-                          <li>
-                              <div class="msg-container server">
-                                  <p>This is the beginning of the group chat history</p>
-                              </div>
-                          </li>
                       </ul>
                       <form id="message-form" action="">
                           <input id="m" autocomplete="off" /><button>Send</button>
