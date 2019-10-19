@@ -7,11 +7,12 @@ module.exports = class OnlineWebSocket {
     Message: Message;
     MessageType: MessageType;
 
-    constructor(io, userProvider: Provider, Message: Message, MessageType: MessageType) {
+    constructor(io, userProvider: Provider, Message: Message, MessageType: MessageType, chatWs: ChatWebSocket) {
         this.userProvider = userProvider;
         this.Message = Message;
         this.MessageType = MessageType;
         this.namespace = io.of('/');
+        this.chatWs = chatWs;
         this.assignCallbacks();
     }
 
@@ -37,7 +38,7 @@ module.exports = class OnlineWebSocket {
     onConnection(user: User) {
         if (!user) return;
         if (!user.online) {
-            this.sendMessageToAllChatRooms(user.name + ' is now online', user.chatRooms);
+            this.sendMessageToAllChatRooms(user.name + ' is now online', user.chatRooms, user.name);
             console.log(user.name + ' is now online');
         }
         user.online = true;
@@ -48,7 +49,7 @@ module.exports = class OnlineWebSocket {
     * */
     onDisconnect(user: User) {
         if (user.online) {
-            this.sendMessageToAllChatRooms(user.name + ' is now offline', user.chatRooms);
+            this.sendMessageToAllChatRooms(user.name + ' is now offline', user.chatRooms, user.name);
             console.log(user.name + ' is now offline');
         }
         user.online = false;
@@ -58,16 +59,11 @@ module.exports = class OnlineWebSocket {
     /*
     * Iterate over an array of chat room sending them the message provided in the parameters.
     * */
-    sendMessageToAllChatRooms(message: string, chatRooms: number[]) {
+    sendMessageToAllChatRooms(message: string, chatRooms: number[], nickname: string) {
         chatRooms.forEach(chatId =>
-            this.sendMessageToChat(chatId, new this.Message(message, this.MessageType.ServerMessage)));
+            this.chatWs.sendMessageToChat(chatId, new this.Message(message, nickname, this.MessageType.ServerMessage,
+                chatId)));
     }
 
-    /*
-    * Emits a message to the chat room specified.
-    * */
-    sendMessageToChat(chatRoomId: number, message: Message) {
-        this.namespace.to(chatRoomId).emit('server message', JSON.stringify(message));
-    }
 
 };

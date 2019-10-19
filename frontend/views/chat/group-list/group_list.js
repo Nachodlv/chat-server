@@ -3,18 +3,21 @@ import User from "../../../models/user.js";
 import {Message} from "../../../models/message.js";
 import {onGroupSelected} from "../chat.js";
 
-export function groupListInit(socket, user){
+export function groupListInit(socket, user, onGroupListReady: (ChatRoom[]) => void) {
     onNewGroupFormSubmit(socket, user);
-    getGroupsForUser(socket, user)
+    getGroupsForUser(socket, user, onGroupListReady)
 }
 
 /*
 * Gets the ChatRooms a user is part of.
 * */
-function getGroupsForUser(socket, user: User) {
+function getGroupsForUser(socket, user: User, onGroupListReady: (ChatRoom[]) => void) {
     const query = user.chatRooms.reduce((prev, curr) => prev + `ids=${curr}&`, '?');
-    $.get('/chat-rooms'+query.slice(0,query.length-1), (data) =>
-        addGroupList(socket, user, JSON.parse(data)) // TODO check if it parses users correctly
+    $.get('/chat-rooms' + query.slice(0, query.length - 1), (data) => {
+            const groups: ChatRoom[] = JSON.parse(data);
+            onGroupListReady(groups);
+            addGroupList(socket, user, groups);
+        }// TODO check if it parses users correctly
     );
 }
 
@@ -33,14 +36,14 @@ function addGroupList(socket, user: User, groups: ChatRoom[]) {
 * Add the user specified in the parameters to the list of users.
 * */
 function addGroup(socket, user: User, group: ChatRoom) {
-    const lastMsg: Message = group.messages[group.messages.length-1];
+    const lastMsg: Message = group.messages[group.messages.length - 1];
     $('#group-list').append(`
         <li id="li-${group.id}" class="list-group-item list-group-item-primary clickable">
             <p>${group.name}</p>
             ${lastMsg ? `<p class="last-message">${lastMsg.userName}: ${lastMsg.text}</p>` : ''}
         </li>
     `);
-    $(`#li-${group.id}`).on( "click", () => onGroupSelected(socket, user, group));
+    $(`#li-${group.id}`).on("click", () => onGroupSelected(socket, user, group));
 }
 
 /*
@@ -50,12 +53,12 @@ function addGroup(socket, user: User, group: ChatRoom) {
 * */
 function onNewGroupFormSubmit(socket, user: User) {
     $('#new-group-form').submit(() => processSubmit(socket, user));
-    $('#new-group-submit').on( "click", () => processSubmit(socket, user));
+    $('#new-group-submit').on("click", () => processSubmit(socket, user));
 }
 
 function processSubmit(socket, user: User) {
     const input = $('#g');
-    if(!input.val()){
+    if (!input.val()) {
         alert('Invalid new group name');
         return false;
     }

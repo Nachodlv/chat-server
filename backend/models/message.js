@@ -5,8 +5,8 @@ module.exports = class Message {
     timeStamp: Date;
     roomId: number;
 
-    constructor(text: string, userName: string, messageType: MessageType = MessageType.UserMessage,
-                timeStamp: Date = Date.now(), roomId: number) {
+    constructor(text: string, userName: string, messageType: MessageType = MessageType.UserMessage, roomId: number,
+                timeStamp: Date = Date.now()) {
         this.text = text;
         this.userName = userName;
         this.messageType = messageType;

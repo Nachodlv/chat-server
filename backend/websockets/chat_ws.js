@@ -55,6 +55,12 @@ class ChatWebSocket {
         })
     }
 
+    /*
+    * Emits a message to the chat room specified.
+    * */
+    sendMessageToChat(chatRoomId: number, message: Message) {
+        this.namespace.to(chatRoomId).emit('server message', JSON.stringify(message));
+    }
 
 }
 

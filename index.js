@@ -29,7 +29,7 @@ const userController = new (require('./backend/controllers/user_controller.js'))
 const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, __dirname);
 
 const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider);
-const onlineWs = new (require('./backend/websockets/online_ws.js'))(io, userProvider, Message, MessageType);
+const onlineWs = new (require('./backend/websockets/online_ws.js'))(io, userProvider, Message, MessageType, chatWs);
 const chatFunctionsWs = new (require('./backend/websockets/chat_functions_ws.js'))(io, userProvider, roomProvider);
 
 

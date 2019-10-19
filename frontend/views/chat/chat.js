@@ -3,9 +3,9 @@ import {Message} from "../../models/message.js";
 import {MessageType} from "../../models/message.js";
 import {ChatRoom} from "../../models/chat_room.js";
 
-export function chatInit(socket, user) {
+export function chatInit(socket, user, groups: ChatRoom[]) {
     onMessageReceived(socket, user);
-    onServerMessage(socket);
+    onServerMessage(socket, groups);
 }
 
 /*
@@ -19,6 +19,7 @@ export function onGroupSelected(socket, user, group) {
 
 function populateHTML(user: User, group: ChatRoom){
     $('#chat-group-name').text(group.name);
+    $('#chat-group-id').text(group.id);
     $('#messages').empty().append('<li>' +
         '<div class="msg-container server">' +
         '<p>This is the beginning of the group chat history</p>' +
@@ -78,10 +79,12 @@ function appendUserMessage(msg: Message, isAuthor: boolean) {
 /*
 * Listener that is called when a server message is sent to this specific roomId and namespace.
 * */
-function onServerMessage(socket) {
+function onServerMessage(socket, groups: ChatRoom[]) {
     socket.on('server message', (msgStr) => {
         const msg: Message = JSON.parse(msgStr);
-        appendServerMessage(msg);
+        const group: ChatRoom = groups.find(group => group.id === msg.roomId);
+        if(group) group.messages.push(msg);
+        if(Number($('#chat-group-id').text()) === msg.roomId) appendServerMessage(msg);
     });
 }
 

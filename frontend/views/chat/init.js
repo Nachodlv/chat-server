@@ -26,8 +26,8 @@ $(function () {
 * Gets chat rooms for logged user
 * */
 function init(user: User) {
-    const socket = io('/chat-room', {query: "userId=" + user.id});
-    user.chatRooms.forEach(roomId => socket.emit('join', roomId));
-    groupListInit(socket, user);
-    chatInit(socket, user);
+    io('/', {query: "userId=" + user.id});
+    const chatSocket = io('/chat-room');
+    user.chatRooms.forEach(roomId => chatSocket.emit('join', roomId));
+    groupListInit(chatSocket, user, (groups) => chatInit(chatSocket, user, groups));
 }
