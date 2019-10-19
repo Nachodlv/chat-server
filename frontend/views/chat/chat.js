@@ -7,6 +7,7 @@ import {getGroupsForUser} from "./group-list/group_list.js";
 import {ChatRoom} from "../../models/chat_room.js";
 
 let loggedUser: User;
+export let socket: any;
 
 /*
 * Function that executes when the file is imported in index.html
@@ -32,9 +33,8 @@ $(function () {
 function init(user: User) {
     loggedUser = user;
     getGroupsForUser(user);
-    const socket = io('/chat-room', {query: "userId=" + loggedUser.id});
-    socket.emit('join', group.id);
-    onSubmit(socket, loggedUser, group.id);
+    socket = io('/chat-room', {query: "userId=" + loggedUser.id});
+    user.chatRooms.forEach(roomId => socket.emit('join', roomId));
     onMessageReceived(socket, loggedUser);
     onServerMessage(socket);
 }
@@ -44,6 +44,7 @@ function init(user: User) {
 * It initializes the form submit and message received listeners.
 * */
 export function onGroupSelected(group) {
+    onSubmit(socket, loggedUser, group.id);
     populateHTML(loggedUser, group)
 }
 

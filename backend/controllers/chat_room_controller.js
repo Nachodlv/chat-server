@@ -4,9 +4,11 @@
 class ChatRoomController {
     dirname: string;
     chatRoomProvider: Provider;
-    constructor(app, chatRoomProvider: Provider, dirname: string) {
+    userProvider: Provider;
+    constructor(app, chatRoomProvider: Provider, userProvider: Provider, dirname: string) {
         this.app = app;
         this.chatRoomProvider = chatRoomProvider;
+        this.userProvider = userProvider;
         this.dirname = dirname;
         this.chatView();
         this.getChatRoom();
@@ -66,18 +68,19 @@ class ChatRoomController {
     /*
     * Creates a new group.
     * If it is successful it will return a status code 200.
-    * If the name is already used, it will return a status code 409.
     * */
     newChatRoom() {
         this.app.post('/chat-room', (req, res) => {
-            const room = req.body;
-            const result = this.chatRoomProvider.models.find((model: ChatRoom) => model.name === room.name);
-            if(result) {
-                res.status(409);
-                res.send('Group name already in use');
+            const room: ChatRoom = req.body;
+            const user: User = this.userProvider.getModel(room.ownerId);
+            if(!user) {
+                res.status(404);
+                res.send('No user was found with id: ' + room.ownerId);
                 return;
             }
+            room.users.push(user);
             const newRoom = this.chatRoomProvider.createModel(room);
+            user.chatRooms.push(newRoom.id);
             res.status(200);
             res.send(JSON.stringify(newRoom));
         });

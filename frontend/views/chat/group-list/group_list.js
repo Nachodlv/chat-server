@@ -2,6 +2,7 @@ import {ChatRoom} from "../../../models/chat_room.js";
 import User from "../../../models/user.js";
 import {Message} from "../../../models/message.js";
 import {onGroupSelected} from "../chat.js";
+import {socket} from "../chat.js";
 
 /*
 * Function that executes when the file is imported in group_list.html
@@ -61,17 +62,19 @@ function onNewGroupFormSubmit() {
             return;
         }
         const newRoom = new ChatRoom(input.val(), loggedUser.id);
-        newRoom.users.push(loggedUser);
         $.ajax({
             type: "POST",
-            beforeSend: function(request) {
+            beforeSend: (request) => {
                 request.setRequestHeader("Content-Type", "application/json");
             },
             url: "/chat-room",
             data: JSON.stringify(newRoom),
             processData: false,
-            success: function(msg) {
-                addGroup(JSON.parse(msg));
+            success: (msg) => {
+                const group: ChatRoom = JSON.parse(msg);
+                socket.emit("join", group.id);
+                addGroup(group);
+
                 input.val('');
             },
             error: function (xhr) {

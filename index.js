@@ -26,7 +26,7 @@ gianni.chatRooms.push(0);
 userProvider.createModel(gianni);
 
 const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname);
-const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, __dirname);
+const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, __dirname);
 
 const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider);
 const onlineWs = new (require('./backend/websockets/online_ws'))(io, userProvider, chatWs, Message, MessageType);
