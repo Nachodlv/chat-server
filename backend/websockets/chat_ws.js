@@ -42,7 +42,6 @@ class ChatWebSocket {
             room.messages.push(message);
             socket.to(message.roomId).emit('chat message', msg);
             console.log(message.userName + "(" + message.roomId +"): " + message.text)
-            // socket.emit('chat message', msg);
         });
     }
 

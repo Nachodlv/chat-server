@@ -24,7 +24,7 @@ module.exports = class OnlineWebSocket {
         this.namespace.on('connection', (socket) => {
             const userId: number = Number(socket.handshake.query['userId']);
             const user: User = this.userProvider.getModel(userId);
-            this.namespace.join(String(userId));
+            socket.join(String(userId));
             if (!user) return;
             this.onConnection(user);
             socket.on('disconnect', () => this.onDisconnect(user));

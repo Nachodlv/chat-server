@@ -1,41 +1,10 @@
-import {AuthService} from "../../services/auth-service.js";
 import User from "../../models/user.js";
 import {Message} from "../../models/message.js";
 import {MessageType} from "../../models/message.js";
-import {addChatList, onUserStatusChange} from "./chat-list/chat_list.js";
-import {getGroupsForUser} from "./group-list/group_list.js";
 import {ChatRoom} from "../../models/chat_room.js";
 
-let loggedUser: User;
-export let socket: any;
-
-/*
-* Function that executes when the file is imported in index.html
-* Check if the user is logged in
-* */
-$(function () {
-    const user = new User("jorge");
-    addChatList([user]);
-    setTimeout(() => {
-        user.online = true;
-        onUserStatusChange(user);
-    }, 10000);
-    AuthService.isAuthorized(init, () => {
-        window.location.href = '/login';
-        return false
-    });
-
-});
-
-/*
-* Gets chat rooms for logged user
-* */
-function init(user: User) {
-    loggedUser = user;
-    getGroupsForUser(user);
-    socket = io('/chat-room', {query: "userId=" + loggedUser.id});
-    user.chatRooms.forEach(roomId => socket.emit('join', roomId));
-    onMessageReceived(socket, loggedUser);
+export function chatInit(socket, user) {
+    onMessageReceived(socket, user);
     onServerMessage(socket);
 }
 
@@ -43,9 +12,9 @@ function init(user: User) {
 * It initializes the socket at a given namespace and room.
 * It initializes the form submit and message received listeners.
 * */
-export function onGroupSelected(group) {
-    onSubmit(socket, loggedUser, group.id);
-    populateHTML(loggedUser, group)
+export function onGroupSelected(socket, user, group) {
+    onSubmit(socket, user, group);
+    populateHTML(user, group)
 }
 
 function populateHTML(user: User, group: ChatRoom){
@@ -67,11 +36,12 @@ function populateHTML(user: User, group: ChatRoom){
 * It grabs the value entered by the user and emits it as a Message object.
 * The Message object has some added information used to route and display the message.
 * */
-function onSubmit(socket, user, roomId) {
-    $('#message-form').submit(() => {
+function onSubmit(socket, user, group) {
+    $('#message-form').unbind('submit').bind('submit', () => {
         const input = $('#m');
         // socket.emit('chat message', input.val());
-        const message = new Message(input.val(), user.name, MessageType.UserMessage, new Date(), roomId);
+        const message = new Message(input.val(), user.name, MessageType.UserMessage, new Date(), group.id);
+        group.messages.push(message);
         appendUserMessage(message, true);
         socket.emit('chat message', JSON.stringify(message));
         input.val('');
@@ -84,7 +54,6 @@ function onSubmit(socket, user, roomId) {
 * */
 function onMessageReceived(socket, user) {
     socket.on('chat message', (msgStr) => {
-        debugger;
         const msg: Message = JSON.parse(msgStr);
         appendUserMessage(msg, msg.userName === user.name);
     });
@@ -124,5 +93,3 @@ function appendServerMessage(msg: Message) {
         .append($('<p>').text(`${msg.text} (${new Date(msg.timeStamp).toLocaleTimeString('it-IT')})`))));
     window.scrollTo(0, document.body.scrollHeight);
 }
-
-// TODO get All previous messages upon joining, How do I access provider ???
