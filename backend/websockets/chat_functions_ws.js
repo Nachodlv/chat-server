@@ -1,4 +1,3 @@
-import {ChatRoom} from "../../frontend/models/chat_room";
 /*
 * Web socket used to invite or kick users from groups.
 * */
