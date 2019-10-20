@@ -4,7 +4,6 @@ import {Message} from "../../../models/message.js";
 import {onGroupSelected} from "../chat.js";
 
 export function groupListInit(chatSocket, serverSocket, user, onGroupListReady: (ChatRoom[]) => void) {
-    onNewGroupFormSubmit(chatSocket, user);
     getGroupsForUser(chatSocket, serverSocket, user, onGroupListReady);
 }
 
@@ -18,6 +17,7 @@ function getGroupsForUser(chatSocket, serverSocket, user: User, onGroupListReady
             onGroupListReady(groups);
             addGroupList(chatSocket, user, groups);
             listenToInvites(serverSocket, chatSocket, user, groups);
+            onNewGroupFormSubmit(chatSocket, user, groups);
         }// TODO check if it parses users correctly
     );
 }
@@ -51,12 +51,12 @@ function addGroup(socket, user: User, group: ChatRoom) {
 * function.
 * If the post fails it will show an error in the html specifying the error.
 * */
-function onNewGroupFormSubmit(socket, user: User) {
-    $('#new-group-form').submit(() => processSubmit(socket, user));
-    $('#new-group-submit').on("click", () => processSubmit(socket, user));
+function onNewGroupFormSubmit(socket, user: User, rooms: ChatRoom[]) {
+    $('#new-group-form').submit(() => processSubmit(socket, user, rooms));
+    $('#new-group-submit').on("click", () => processSubmit(socket, user, rooms));
 }
 
-function processSubmit(socket, user: User) {
+function processSubmit(socket, user: User, rooms: ChatRoom[]) {
     const input = $('#g');
     if (!input.val()) {
         alert('Invalid new group name');
@@ -73,6 +73,7 @@ function processSubmit(socket, user: User) {
         processData: false,
         success: (msg) => {
             const group: ChatRoom = JSON.parse(msg);
+            rooms.push(group);
             socket.emit("join", group.id);
             addGroup(socket, user, group);
             input.val('');

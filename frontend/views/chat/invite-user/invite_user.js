@@ -1,5 +1,6 @@
 import {ChatRoom} from "../../../models/chat_room.js";
 import {addUser} from "../user-list/user_list.js";
+import {getCurrentRoomId} from "../chat.js";
 
 /*
 * Add the html from invite_user.html to the DOM where the function is called.
@@ -40,12 +41,6 @@ function inviteUser(serverSocket, rooms: ChatRoom[]) {
     return false;
 }
 
-/*
-* Gets the current room id from the DOM.
-* */
-function getCurrentRoomId(): number {
-    return Number($('#chat-group-id').text());
-}
 
 /*
 * Shows or hides an error message.

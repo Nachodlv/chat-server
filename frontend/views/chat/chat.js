@@ -4,7 +4,7 @@ import {MessageType} from "../../models/message.js";
 import {ChatRoom} from "../../models/chat_room.js";
 
 export function chatInit(socket, user, groups: ChatRoom[]) {
-    onMessageReceived(socket, user);
+    onMessageReceived(socket, user, groups);
     onServerMessage(socket, groups);
 }
 
@@ -54,10 +54,12 @@ function onSubmit(socket, user, group) {
 /*
 * Listener that is called when a user message is sent to this specific roomId and namespace.
 * */
-function onMessageReceived(socket, user) {
+function onMessageReceived(socket, user, groups: ChatRoom[]) {
     socket.on('chat message', (msgStr) => {
         const msg: Message = JSON.parse(msgStr);
-        appendUserMessage(msg, msg.userName === user.name);
+        groups.find(group => group.id === msg.roomId).messages.push(msg);
+        console.log(getCurrentRoomId());
+        if(getCurrentRoomId() === msg.roomId) appendUserMessage(msg, msg.userName === user.name);
     });
 }
 
@@ -85,7 +87,7 @@ function onServerMessage(socket, groups: ChatRoom[]) {
         const msg: Message = JSON.parse(msgStr);
         const group: ChatRoom = groups.find(group => group.id === msg.roomId);
         if(group) group.messages.push(msg);
-        if(Number($('#chat-group-id').text()) === msg.roomId) appendServerMessage(msg);
+        if(getCurrentRoomId() === msg.roomId) appendServerMessage(msg);
     });
 }
 
@@ -96,4 +98,12 @@ function appendServerMessage(msg: Message) {
     $('#messages').append($('<li>').append($('<div class="msg-container server">')
         .append($('<p>').text(`${msg.text} (${new Date(msg.timeStamp).toLocaleTimeString('it-IT')})`))));
     window.scrollTo(0, document.body.scrollHeight);
+}
+
+/*
+* Gets the current room id from the DOM.
+* */
+export function getCurrentRoomId(): number {
+    const id: string = $('#chat-group-id').text();
+    return id? Number(id) : undefined;
 }
