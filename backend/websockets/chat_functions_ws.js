@@ -33,6 +33,7 @@ module.exports = class ChatFunctionWebSocket {
     * When an invite to a group is sent it automatically adds the user invited to the chat.
     * The user who sends the invite is responded if the invitation was successful or it was a failure and the user
     * invited is notified.
+    * If the invitation is successful a server message to the room is send.
     * */
     onChatRoomInvite(socket) {
         socket.on('invite', (data, fn: (user: User, containsError: boolean, errorMessage: string) => void) => {
