@@ -30,7 +30,7 @@ function init(user: User) {
     const serverSocket = io('/', {query: "userId=" + user.id});
     const chatSocket = io('/chat-room');
     user.chatRooms.forEach(roomId => chatSocket.emit('join', roomId));
-    groupListInit(chatSocket, user, (groups) => {
+    groupListInit(chatSocket, serverSocket, user, (groups) => {
         chatInit(chatSocket, user, groups);
         addInviteUserInput(serverSocket, groups);
     });

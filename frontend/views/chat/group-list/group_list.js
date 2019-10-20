@@ -3,20 +3,21 @@ import User from "../../../models/user.js";
 import {Message} from "../../../models/message.js";
 import {onGroupSelected} from "../chat.js";
 
-export function groupListInit(socket, user, onGroupListReady: (ChatRoom[]) => void) {
-    onNewGroupFormSubmit(socket, user);
-    getGroupsForUser(socket, user, onGroupListReady)
+export function groupListInit(chatSocket, serverSocket, user, onGroupListReady: (ChatRoom[]) => void) {
+    onNewGroupFormSubmit(chatSocket, user);
+    getGroupsForUser(chatSocket, serverSocket, user, onGroupListReady);
 }
 
 /*
 * Gets the ChatRooms a user is part of.
 * */
-function getGroupsForUser(socket, user: User, onGroupListReady: (ChatRoom[]) => void) {
+function getGroupsForUser(chatSocket, serverSocket, user: User, onGroupListReady: (ChatRoom[]) => void) {
     const query = user.chatRooms.reduce((prev, curr) => prev + `ids=${curr}&`, '?');
     $.get('/chat-rooms' + query.slice(0, query.length - 1), (data) => {
             const groups: ChatRoom[] = JSON.parse(data);
             onGroupListReady(groups);
-            addGroupList(socket, user, groups);
+            addGroupList(chatSocket, user, groups);
+            listenToInvites(serverSocket, chatSocket, user, groups);
         }// TODO check if it parses users correctly
     );
 }
@@ -27,7 +28,6 @@ function getGroupsForUser(socket, user: User, onGroupListReady: (ChatRoom[]) => 
 function addGroupList(socket, user: User, groups: ChatRoom[]) {
     $.get("./chat/group-list/group_list.html", (data) => {
         $('#group-list').html(data);
-
         groups.forEach(group => addGroup(socket, user, group));
     });
 }
@@ -84,4 +84,13 @@ function processSubmit(socket, user: User) {
         }
     });
     return false;
+}
+
+function listenToInvites(serverSocket, chatSocket, user: User, groups: ChatRoom[]) {
+    serverSocket.on('invite', (room: ChatRoom) => {
+        chatSocket.emit('join', room.id);
+        groups.push(room);
+        user.chatRooms.push(room.id);
+        addGroup(chatSocket, user, room);
+    });
 }
