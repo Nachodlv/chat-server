@@ -13,6 +13,7 @@ export function chatInit(socket, user, groups: ChatRoom[]) {
 * It initializes the form submit and message received listeners.
 * */
 export function onGroupSelected(socket, user, group) {
+    $('#invite-user')[0].hidden = false;
     onSubmit(socket, user, group);
     populateHTML(user, group)
 }

@@ -4,10 +4,16 @@
 module.exports = class ChatFunctionWebSocket {
     userProvider: Provider;
     roomProvider: Provider;
+    Message: Message;
+    MessageType: MessageType;
+    chatWs: ChatWebSocket;
 
-    constructor(io, userProvider: Provider, roomProvider: Provider) {
+    constructor(io, userProvider: Provider, roomProvider: Provider, Message: Message, chatWs: ChatWebSocket, MessageType: MessageType) {
         this.userProvider = userProvider;
         this.roomProvider = roomProvider;
+        this.chatWs = chatWs;
+        this.Message = Message;
+        this.MessageType = MessageType;
         this.namespace = io.of('/');
         this.assignCallbacks();
     }
@@ -29,21 +35,28 @@ module.exports = class ChatFunctionWebSocket {
     * invited is notified.
     * */
     onChatRoomInvite(socket) {
-        socket.on('invite', (roomId: number, nickname: string, onSuccess: (User) => void, onFailure: (string) => void) => {
-            const room: ChatRoom = this.roomProvider.getModel(roomId);
+        socket.on('invite', (data, fn: (user: User, containsError: boolean, errorMessage: string) => void) => {
+            const room: ChatRoom = this.roomProvider.getModel(data.roomId);
             if (!room) {
-                onFailure('An error occurred');
+                fn(undefined, true, 'An error occurred');
                 return;
             }
-            const user: User = this.userProvider.models.find((model) => model.name === nickname);
+            const user: User = this.userProvider.models.find((model) => model.name === data.nickname);
             if (!user) {
-                onFailure('The user does not exists');
+                fn(user, true, 'The user does not exists');
+                return;
+            }
+            if (room.users.find(u => u.id === user.id)) {
+                fn(user, true, 'The user is already in the chat room');
                 return;
             }
             room.users.push(user);
             user.chatRooms.push(room.id);
-            onSuccess(user);
+            fn(user, false);
             socket.to(user.id).emit('invite', room);
+            this.chatWs.sendMessageToChat(room.id, new this.Message(`${user.name} has joined the group!`,
+                user.name, this.MessageType.ServerMessage, room.id));
+            console.log(`${data.nickname} was invited to ${room.name}`)
         })
     }
 

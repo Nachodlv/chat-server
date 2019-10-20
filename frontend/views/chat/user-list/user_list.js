@@ -12,7 +12,7 @@ export function addChatList(users: User[] = []) {
 /*
 * Add the user specified in the parameters to the list of users.
 * */
-function addUser(user: User) {
+export function addUser(user: User) {
     $('#user-list').append(`
         <div class="dropdown-item" id="${user.id}">
             <div class="row justify-content-between">
