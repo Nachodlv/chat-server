@@ -10,12 +10,6 @@ import {chatInit} from "./chat.js";
 import {addInviteUserInput} from "./invite-user/invite_user.js";
 
 $(function () {
-    const user = new User("jorge");
-    addChatList([user]);
-    setTimeout(() => {
-        user.online = true;
-        onUserStatusChange(user);
-    }, 10000);
     AuthService.isAuthorized(init, () => {
         window.location.href = '/login';
         return false

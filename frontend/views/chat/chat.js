@@ -2,6 +2,7 @@ import User from "../../models/user.js";
 import {Message} from "../../models/message.js";
 import {MessageType} from "../../models/message.js";
 import {ChatRoom} from "../../models/chat_room.js";
+import {addChatList, onUserStatusChange} from "./user-list/user_list.js";
 
 export function chatInit(socket, user, groups: ChatRoom[]) {
     onMessageReceived(socket, user, groups);
@@ -12,8 +13,9 @@ export function chatInit(socket, user, groups: ChatRoom[]) {
 * It initializes the socket at a given namespace and room.
 * It initializes the form submit and message received listeners.
 * */
-export function onGroupSelected(socket, user, group) {
+export function onGroupSelected(socket, user, group: ChatRoom) {
     $('#invite-user')[0].hidden = false;
+    addChatList(group.users);
     onSubmit(socket, user, group);
     populateHTML(user, group)
 }
@@ -87,6 +89,11 @@ function onServerMessage(socket, groups: ChatRoom[]) {
         const msg: Message = JSON.parse(msgStr);
         const group: ChatRoom = groups.find(group => group.id === msg.roomId);
         if(group) group.messages.push(msg);
+        if(msg.messageType === MessageType.OnlineMessage) {
+            onUserStatusChange(msg.userName, true);
+        } else if(msg.messageType === MessageType.OfflineMessage) {
+            onUserStatusChange(msg.userName, false);
+        }
         if(getCurrentRoomId() === msg.roomId) appendServerMessage(msg);
     });
 }

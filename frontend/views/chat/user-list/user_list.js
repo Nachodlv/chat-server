@@ -14,7 +14,7 @@ export function addChatList(users: User[] = []) {
 * */
 export function addUser(user: User) {
     $('#user-list').append(`
-        <div class="dropdown-item" id="${user.id}">
+        <div class="dropdown-item" id="${user.name}">
             <div class="row justify-content-between">
                 <div class="user-name">${user.name}</div>
                 <i class="${getIconClass(user.online)}">brightness_1</i>
@@ -26,8 +26,8 @@ export function addUser(user: User) {
 /*
 * Changes the color of the icon next to the user name depending if it is online or offline.
 * */
-export function onUserStatusChange(user: User) {
-    $(`#${user.id} .user-status`)[0].className = getIconClass(user.online);
+export function onUserStatusChange(userName: string, online: boolean) {
+    $(`#${userName} .user-status`)[0].className = getIconClass(online);
 
 }
 

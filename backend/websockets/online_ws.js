@@ -38,7 +38,7 @@ module.exports = class OnlineWebSocket {
     onConnection(user: User) {
         if (!user) return;
         if (!user.online) {
-            this.sendMessageToAllChatRooms(user.name + ' is now online', user.chatRooms, user.name);
+            this.sendMessageToAllChatRooms(user.name + ' is now online', user.chatRooms, user.name, true);
             console.log(user.name + ' is now online');
         }
         user.online = true;
@@ -49,7 +49,7 @@ module.exports = class OnlineWebSocket {
     * */
     onDisconnect(user: User) {
         if (user.online) {
-            this.sendMessageToAllChatRooms(user.name + ' is now offline', user.chatRooms, user.name);
+            this.sendMessageToAllChatRooms(user.name + ' is now offline', user.chatRooms, user.name, false);
             console.log(user.name + ' is now offline');
         }
         user.online = false;
@@ -59,9 +59,10 @@ module.exports = class OnlineWebSocket {
     /*
     * Iterate over an array of chat room sending them the message provided in the parameters.
     * */
-    sendMessageToAllChatRooms(message: string, chatRooms: number[], nickname: string) {
+    sendMessageToAllChatRooms(message: string, chatRooms: number[], nickname: string, online: boolean) {
         chatRooms.forEach(chatId =>
-            this.chatWs.sendMessageToChat(chatId, new this.Message(message, nickname, this.MessageType.ServerMessage,
+            this.chatWs.sendMessageToChat(chatId, new this.Message(message, nickname,
+                online ? this.MessageType.OnlineMessage : this.MessageType.OfflineMessage,
                 chatId)));
     }
 

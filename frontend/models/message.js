@@ -16,6 +16,8 @@ export class Message {
 }
 
 export const MessageType = {
+    OnlineMessage: 'OnlineMessage',
+    OfflineMessage: 'OfflineMessage',
     ServerMessage: 'ServerMessage',
     ChatInvite: 'ChatInvite',
     UserMessage: 'UserMessage',
