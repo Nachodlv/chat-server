@@ -1,7 +1,7 @@
 
 export class CookieService {
 
-    static setCookie(cname: string, cvalue, exdays) {
+    static setCookie(cname: string, cvalue, exdays = 1) {
         const d = new Date();
         d.setTime(d.getTime() + (exdays*24*60*60*1000));
         const expires = "expires="+ d.toUTCString();

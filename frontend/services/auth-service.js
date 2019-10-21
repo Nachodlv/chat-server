@@ -9,7 +9,7 @@ export class AuthService {
             return;
         }
         const user = JSON.parse(cookie);
-        if(!user.id) {
+        if(user.id === undefined) {
             this._failToAuthorize(onFailure);
             return;
         }
