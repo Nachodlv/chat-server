@@ -5,10 +5,13 @@ class ChatRoomController {
     dirname: string;
     chatRoomProvider: Provider;
     userProvider: Provider;
-    constructor(app, chatRoomProvider: Provider, userProvider: Provider, dirname: string) {
+    privateMessageProvider: Provider;
+
+    constructor(app, chatRoomProvider: Provider, userProvider: Provider, privateMessagesProvider: Provider, dirname: string) {
         this.app = app;
         this.chatRoomProvider = chatRoomProvider;
         this.userProvider = userProvider;
+        this.privateMessageProvider = privateMessagesProvider;
         this.dirname = dirname;
         this.chatView();
         this.getChatRoom();
@@ -20,9 +23,9 @@ class ChatRoomController {
     * Returns the view of the index.html
     * */
     chatView() {
-       this.app.get('/', (req, res) =>
-           res.sendFile(this.dirname + '/frontend/views/chat/index.html')
-       );
+        this.app.get('/', (req, res) =>
+            res.sendFile(this.dirname + '/frontend/views/chat/index.html')
+        );
     }
 
     /*
@@ -31,15 +34,16 @@ class ChatRoomController {
     * */
     getChatRoom() {
         this.app.get('/chat-room/:roomId*', (req, res) => {
+            const userId = JSON.parse(req.cookies.user).id;
             const roomId = Number(req.params['roomId']);
             const room = this.chatRoomProvider.getModel(roomId);
-            if(!room) {
+            if (!room) {
                 res.status(404);
                 res.send('No chat room found with id: ' + roomId);
                 return;
             }
             res.status(200);
-            res.send(JSON.stringify(room));
+            res.send(JSON.stringify(this._attachPrivateMessage(room, userId)));
         });
     }
 
@@ -49,19 +53,21 @@ class ChatRoomController {
     * */
     getChatRooms() {
         this.app.get('/chat-rooms', (req, res) => {
+            const userId = JSON.parse(req.cookies.user).id;
             const roomIds = Array.isArray(req.query.ids) ? req.query.ids : [req.query.ids];
             const rooms = roomIds.map(roomId => this.chatRoomProvider.getModel(Number(roomId)));
-            if(!rooms || rooms.length === 0) {
+            if (!rooms || rooms.length === 0) {
                 res.status(404);
                 res.send('No chat room found for current user');
                 return;
-            } else if(rooms.filter(r => !r).length !== 0) {
+            } else if (rooms.filter(r => !r).length !== 0) {
                 res.status(404);
                 res.send('Invalid room id');
                 return;
             }
             res.status(200);
-            res.send(JSON.stringify(rooms));
+            const rooms2 = rooms.map(room => this._attachPrivateMessage(room, userId));
+            res.send(JSON.stringify(rooms2));
         });
     }
 
@@ -73,7 +79,7 @@ class ChatRoomController {
         this.app.post('/chat-room', (req, res) => {
             const room: ChatRoom = req.body;
             const user: User = this.userProvider.getModel(room.ownerId);
-            if(!user) {
+            if (!user) {
                 res.status(404);
                 res.send('No user was found with id: ' + room.ownerId);
                 return;
@@ -84,6 +90,17 @@ class ChatRoomController {
             res.status(200);
             res.send(JSON.stringify(newRoom));
         });
+    }
+
+    /*
+    * Attaches the private messages to the chat room.
+    * */
+    _attachPrivateMessage(room: ChatRoom, userId: number): ChatRoom {
+        const messages: PrivateMessage[] = this.privateMessageProvider.models.filter((message: PrivateMessage) =>
+            message.roomId === room.id && message.userIds.find(id => id === userId));
+        const clonedRoom: ChatRoom = JSON.parse(JSON.stringify(room));
+        clonedRoom.messages.push(...messages);
+        return clonedRoom;
     }
 }
 

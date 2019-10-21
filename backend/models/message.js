@@ -1,4 +1,4 @@
-module.exports = class Message {
+class Message {
     text: string;
     userName: string;
     messageType: MessageType;
@@ -13,11 +13,6 @@ module.exports = class Message {
         this.timeStamp = timeStamp;
         this.roomId = roomId;
     }
-};
+}
 
-const MessageType = {
-    ServerMessage: 'ServerMessage',
-    ChatInvite: 'ChatInvite',
-    UserMessage: 'UserMessage',
-    Multimedia: 'Multimedia'
-};
+module.exports = Message;
