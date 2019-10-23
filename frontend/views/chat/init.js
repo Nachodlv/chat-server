@@ -3,7 +3,6 @@
 * Check if the user is logged in
 * */
 import User from "../../models/user.js";
-import {addChatList, onUserStatusChange} from "./user-list/user_list.js";
 import {AuthService} from "../../services/auth-service.js";
 import {groupListInit} from "./group-list/group_list.js";
 import {chatInit} from "./chat.js";
@@ -25,7 +24,7 @@ function init(user: User) {
     const chatSocket = io('/chat-room');
     user.chatRooms.forEach(roomId => chatSocket.emit('join', roomId));
     groupListInit(chatSocket, serverSocket, user, (groups) => {
-        chatInit(chatSocket, user, groups);
+        chatInit(chatSocket, user, groups, serverSocket);
         addInviteUserInput(serverSocket, groups);
     });
 }

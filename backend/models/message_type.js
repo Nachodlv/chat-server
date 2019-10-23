@@ -1,4 +1,5 @@
 const MessageType = {
+    PrivateMessage: 'PrivateMessage',
     OnlineMessage: 'OnlineMessage',
     OfflineMessage: 'OfflineMessage',
     ServerMessage: 'ServerMessage',

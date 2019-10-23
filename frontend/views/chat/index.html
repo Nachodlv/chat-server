@@ -1,86 +1,109 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <title>Socket.IO chat</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel = "stylesheet" type = "text/css" href = "../chat/index.css" />
-    <link rel = "stylesheet" type = "text/css" href = "../chat/user-list/user_list.css" />
-      <link rel = "stylesheet" type = "text/css" href = "../chat/group-list/group_list.css" />
-      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  </head>
-  <body>
-      <div class="row">
-          <div class="col-4 pl-0">
-              <div class=" header-title container d-flex">
-                  <h4>Chat rooms</h4>
-                  <div class="add-group-container">
-                      <form id="new-group-form" action="">
-                          <input id="g" autocomplete="off" placeholder="New group name..."/>
-                          <i id="new-group-submit" class="material-icons group-add clickable">group_add</i>
-                      </form>
-                  </div>
-              </div>
-              <div id="group-list"></div>
-          </div>
-          <div class="col-8 pr-0">
-              <div class="row">
-                  <div class="col">
-                      <div class="header-title container d-flex">
-                          <div class="row justify-content-between align-items-center w-100">
-                              <h4 id="chat-group-name">No chat room selected</h4>
-                              <div id="chat-group-id" hidden></div>
-                              <div class="d-flex align-items-center">
-                                  <div id="invite-user" hidden></div>
-                                  <div id="chat-list"></div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-                  <div class="w-100"></div>
-                  <div class="col">
-                      <ul id="messages">
-                          <!--<li>
-                              <div class="msg-container author">
-                                  <p>Default message</p>
-                                  <p class="time">16:30:10</p>
-                              </div>
-                          </li>
-                          <li>
-                              <div class="msg-container">
-                                  <p class="author-name">Gianni</p>
-                                  <p>Default message</p>
-                                  <p class="time">16:30:20</p>
-                              </div>
-                          </li>
-                          <li>
-                              <div class="msg-container server">
-                                  <p>A user has joined the channel (16:30:20)</p>
-                              </div>
-                          </li>-->
-                      </ul>
-                      <form id="message-form" action="">
-                          <input id="m" autocomplete="off" /><button>Send</button>
-                      </form>
-                  </div>
-              </div>
-          </div>
-      </div>
+    <link rel="stylesheet" type="text/css" href="../chat/index.css"/>
+    <link rel="stylesheet" type="text/css" href="../chat/user-list/user_list.css"/>
+    <link rel="stylesheet" type="text/css" href="../chat/group-list/group_list.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+<div class="row">
+    <div class="col-4 pl-0">
+        <div class=" header-title container d-flex">
+            <h4>Chat rooms</h4>
+            <div class="add-group-container">
+                <form id="new-group-form" action="">
+                    <input id="g" autocomplete="off" placeholder="New group name..."/>
+                    <i id="new-group-submit" class="material-icons group-add clickable">group_add</i>
+                </form>
+            </div>
+        </div>
+        <div id="group-list"></div>
+    </div>
+    <div class="col-8 pr-0">
+        <div class="row">
+            <div class="col">
+                <div class="header-title container d-flex">
+                    <div class="row justify-content-between align-items-center w-100">
+                        <h4 id="chat-group-name">No chat room selected</h4>
+                        <div id="chat-group-id" hidden></div>
+                        <div class="d-flex align-items-center">
+                            <div id="invite-user" hidden></div>
+                            <div id="chat-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-100"></div>
+            <div class="col">
+                <ul id="messages">
+<!--                    <li>-->
+<!--                        <div class="msg-container private-message author">-->
+<!--                            <p>Default message</p>-->
+<!--                            <p class="time">16:30:10</p>-->
+<!--                        </div>-->
+<!--                    </li>-->
+<!--                    <li>-->
+<!--                        <div class="msg-container private-message">-->
+<!--                            <div class="row"><p class="author-name private-message">Gianni</p>-->
+<!--                                <div class="dropdown">-->
+<!--                                    <div class="dropdown-toggle" id="dropdownMenu2"-->
+<!--                                         data-toggle="dropdown"-->
+<!--                                         aria-haspopup="true" aria-expanded="false">-->
+<!--                                    </div>-->
+<!--                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2" id="user-list">-->
+<!--                                        <div class="dropdown-item">-->
+<!--                                            Ignacio-->
+<!--                                        </div>-->
+<!--                                        <div class="dropdown-item">-->
+<!--                                            Gianni-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <p>Default message</p>-->
+<!--                            <p class="time">16:30:20</p>-->
+<!--                        </div>-->
+<!--                    </li>-->
+<!--                    <li>-->
+<!--                        <div class="msg-container">-->
+<!--                            <p class="author-name">Gianni</p>-->
+<!--                            <p>Default message</p>-->
+<!--                            <p class="time">16:30:20</p>-->
+<!--                        </div>-->
+<!--                    </li>-->
+                    <!--                          <li>-->
+                    <!--                              <div class="msg-container server">-->
+                    <!--                                  <p>A user has joined the channel (16:30:20)</p>-->
+                    <!--                              </div>-->
+                    <!--                          </li>-->
+                </ul>
+                <form id="message-form" action="">
+                    <input id="m" autocomplete="off"/>
+                    <button>Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <!--Bootstrap 4 scripts-->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-            crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-            crossorigin="anonymous"></script>
-    <!--END / Bootstrap 4 scripts-->
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-      <script src="../chat/init.js" type="module"></script>
-      <script src="../chat/chat.js" type="module"></script>
-  </body>
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+<!--Bootstrap 4 scripts-->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<!--END / Bootstrap 4 scripts-->
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="../chat/init.js" type="module"></script>
+<script src="../chat/chat.js" type="module"></script>
+</body>
 </html>

@@ -18,6 +18,9 @@ body { font: 13px Helvetica, Arial; }
     padding: 5px 10px;
     background: antiquewhite;
 }
+#messages .msg-container.private-message {
+    background: #9370dba3;
+}
 #messages .author {
     background: lightgreen;
     margin-left: auto;
@@ -26,6 +29,12 @@ body { font: 13px Helvetica, Arial; }
     font-weight: bold;
     padding-bottom: 5px;
     color: brown;
+}
+#messages .author-name.private-message{
+    color: black;
+}
+#messages .dropdown {
+    margin-left: auto;
 }
 #messages .server {
     max-width: unset;

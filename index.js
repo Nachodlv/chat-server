@@ -31,6 +31,7 @@ const chatRoomController = new (require('./backend/controllers/chat_room_control
 const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider);
 const onlineWs = new (require('./backend/websockets/online_ws.js'))(io, userProvider, Message, MessageType, chatWs);
 const chatFunctionsWs = new (require('./backend/websockets/chat_functions_ws.js'))(io, userProvider, roomProvider, Message, chatWs, MessageType);
+const privateMessagesWs = new (require('./backend/websockets/private_messages_ws.js'))(io, privateMessagesProvider,roomProvider);
 
 
 http.listen(port, function () {

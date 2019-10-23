@@ -16,6 +16,7 @@ export class Message {
 }
 
 export const MessageType = {
+    PrivateMessage: 'PrivateMessage',
     OnlineMessage: 'OnlineMessage',
     OfflineMessage: 'OfflineMessage',
     ServerMessage: 'ServerMessage',
@@ -23,3 +24,14 @@ export const MessageType = {
     UserMessage: 'UserMessage',
     Multimedia: 'Multimedia'
 };
+
+export class PrivateMessage extends Message {
+
+    nicknames: string[];
+
+    constructor(nicknames: string[], text: string, userName: string, messageType: string,
+                timeStamp: Date = new Date(), roomId: number) {
+        super(text, userName, messageType, timeStamp, roomId);
+        this.nicknames = nicknames;
+    }
+}

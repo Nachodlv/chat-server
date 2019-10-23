@@ -15,9 +15,9 @@ function getGroupsForUser(chatSocket, serverSocket, user: User, onGroupListReady
     $.get('/chat-rooms' + query.slice(0, query.length - 1), (data) => {
             const groups: ChatRoom[] = JSON.parse(data);
             onGroupListReady(groups);
-            addGroupList(chatSocket, user, groups);
+            addGroupList(chatSocket, user, groups, serverSocket);
             listenToInvites(serverSocket, chatSocket, user, groups);
-            onNewGroupFormSubmit(chatSocket, user, groups);
+            onNewGroupFormSubmit(chatSocket, user, groups, serverSocket);
         }// TODO check if it parses users correctly
     );
 }
@@ -25,17 +25,17 @@ function getGroupsForUser(chatSocket, serverSocket, user: User, onGroupListReady
 /*
 * Add the html from group_list.html to the DOM where the function is called.
 * */
-function addGroupList(socket, user: User, groups: ChatRoom[]) {
+function addGroupList(socket, user: User, groups: ChatRoom[], serverSocket) {
     $.get("./chat/group-list/group_list.html", (data) => {
         $('#group-list').html(data);
-        groups.forEach(group => addGroup(socket, user, group));
+        groups.forEach(group => addGroup(socket, user, group, serverSocket));
     });
 }
 
 /*
 * Add the user specified in the parameters to the list of users.
 * */
-function addGroup(socket, user: User, group: ChatRoom) {
+function addGroup(socket, user: User, group: ChatRoom, serverSocket) {
     const lastMsg: Message = group.messages[group.messages.length - 1];
     $('#group-list').append(`
         <li id="li-${group.id}" class="list-group-item list-group-item-primary clickable">
@@ -43,7 +43,7 @@ function addGroup(socket, user: User, group: ChatRoom) {
             ${lastMsg ? `<p class="last-message">${lastMsg.userName}: ${lastMsg.text}</p>` : ''}
         </li>
     `);
-    $(`#li-${group.id}`).on("click", () => onGroupSelected(socket, user, group));
+    $(`#li-${group.id}`).on("click", () => onGroupSelected(socket, user, group, serverSocket));
 }
 
 /*
@@ -51,12 +51,12 @@ function addGroup(socket, user: User, group: ChatRoom) {
 * function.
 * If the post fails it will show an error in the html specifying the error.
 * */
-function onNewGroupFormSubmit(socket, user: User, rooms: ChatRoom[]) {
-    $('#new-group-form').submit(() => processSubmit(socket, user, rooms));
-    $('#new-group-submit').on("click", () => processSubmit(socket, user, rooms));
+function onNewGroupFormSubmit(socket, user: User, rooms: ChatRoom[], serverSocket) {
+    $('#new-group-form').submit(() => processSubmit(socket, user, rooms, serverSocket));
+    $('#new-group-submit').on("click", () => processSubmit(socket, user, rooms, serverSocket));
 }
 
-function processSubmit(socket, user: User, rooms: ChatRoom[]) {
+function processSubmit(socket, user: User, rooms: ChatRoom[], serverSocket) {
     const input = $('#g');
     if (!input.val()) {
         alert('Invalid new group name');
@@ -75,7 +75,7 @@ function processSubmit(socket, user: User, rooms: ChatRoom[]) {
             const group: ChatRoom = JSON.parse(msg);
             rooms.push(group);
             socket.emit("join", group.id);
-            addGroup(socket, user, group);
+            addGroup(socket, user, group, serverSocket);
             input.val('');
             return false;
         },
@@ -92,6 +92,6 @@ function listenToInvites(serverSocket, chatSocket, user: User, groups: ChatRoom[
         chatSocket.emit('join', room.id);
         groups.push(room);
         user.chatRooms.push(room.id);
-        addGroup(chatSocket, user, room);
+        addGroup(chatSocket, user, room, serverSocket);
     });
 }

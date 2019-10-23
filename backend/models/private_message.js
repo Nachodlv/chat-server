@@ -1,10 +1,10 @@
 class PrivateMessage extends Message {
-    userIds: number[];
+    nicknames: string[];
 
-    constructor(userIds: number[], text: string, userName: string, messageType: MessageType = MessageType.UserMessage,
+    constructor(nicknames: string[], text: string, userName: string, messageType: MessageType = MessageType.UserMessage,
                 roomId: number, timeStamp: Date = Date.now()) {
         super(text, userName, messageType, roomId, timeStamp);
-        this.userIds = userIds;
+        this.nicknames = nicknames;
     }
 }
 

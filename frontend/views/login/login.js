@@ -22,8 +22,13 @@ $(function () {
 * Adds the functionality to the form of creating a new user when is submitted.
 * */
 function onSubmit(): void {
+    const charactersNotValid = ['@', ',', ' '];
     $('form').submit(function () {
-        const input = $('#nickname').val();
+        const input: string = $('#nickname').val();
+        if (input.match(new RegExp(`.*[${charactersNotValid.join()}]`))) {
+            showError('Invalid characters');
+            return false;
+        }
         createUser(input);
         return false;
     });
@@ -48,8 +53,14 @@ function createUser(nickname): void {
             window.location.href = '/';
         },
         error: function (xhr) {
-            if(xhr.status === 409) $('#nickname-repeated')[0].style['display'] = 'inherit';
-            else $('#error')[0].style['display'] = 'inherit';
+            if(xhr.status === 409) showError('The username is already in use.');
+            else showError('An error has occurred. Please try again later.');
         }
     });
+}
+
+function showError(error: string) {
+    const errorDiv = $('#error')[0];
+   errorDiv.style['display'] = 'inherit';
+   errorDiv.innerHTML = error;
 }

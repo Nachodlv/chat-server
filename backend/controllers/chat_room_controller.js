@@ -53,7 +53,7 @@ class ChatRoomController {
     * */
     getChatRooms() {
         this.app.get('/chat-rooms', (req, res) => {
-            const userId = JSON.parse(req.cookies.user).id;
+            const userNickname = JSON.parse(req.cookies.user).name;
             const roomIds = Array.isArray(req.query.ids) ? req.query.ids : [req.query.ids];
             const rooms = roomIds.map(roomId => this.chatRoomProvider.getModel(Number(roomId)));
             if (!rooms || rooms.length === 0) {
@@ -66,7 +66,7 @@ class ChatRoomController {
                 return;
             }
             res.status(200);
-            const rooms2 = rooms.map(room => this._attachPrivateMessage(room, userId));
+            const rooms2 = rooms.map(room => this._attachPrivateMessage(room, userNickname));
             res.send(JSON.stringify(rooms2));
         });
     }
@@ -95,9 +95,9 @@ class ChatRoomController {
     /*
     * Attaches the private messages to the chat room.
     * */
-    _attachPrivateMessage(room: ChatRoom, userId: number): ChatRoom {
+    _attachPrivateMessage(room: ChatRoom, userNickname: string): ChatRoom {
         const messages: PrivateMessage[] = this.privateMessageProvider.models.filter((message: PrivateMessage) =>
-            message.roomId === room.id && message.userIds.find(id => id === userId));
+            message.roomId === room.id && message.nicknames.find(nickname => nickname === userNickname));
         const clonedRoom: ChatRoom = JSON.parse(JSON.stringify(room));
         clonedRoom.messages.push(...messages);
         return clonedRoom;
