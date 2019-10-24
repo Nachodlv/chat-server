@@ -154,7 +154,7 @@ function onPrivateMessage(serverSocket, groups: ChatRoom[], user: User) {
 function appendPrivateMessage(msg: PrivateMessage, isAuthor: boolean) {
     $('#messages').append($('<li>')
         .append(() => {
-            const node = isAuthor ? '<div class="msg-container private-message author">' : '<div class="msg-container private-message">';
+            const node = $(isAuthor ? '<div class="msg-container private-message author">' : '<div class="msg-container private-message">');
             node.append(`
                 <div class="row">
                     ${!isAuthor ? `<p class="author-name private-message">${msg.userName}</p>` : ''}
