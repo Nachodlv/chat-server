@@ -1,6 +1,7 @@
 /*
 * Web socket to send messages inside each chat room
 * */
+
 class ChatWebSocket {
 
     message: Message;
@@ -37,11 +38,16 @@ class ChatWebSocket {
     * */
     onMessage(socket) {
         socket.on('chat message', (msg) => {
-            const message: Message = JSON.parse(msg);
+            const message: Message | FileMessage = JSON.parse(msg);
             const room: ChatRoom = this.chatRoomProvider.getModel(message.roomId);
             room.messages.push(message);
-            socket.to(message.roomId).emit('chat message', msg);
-            console.log(message.userName + "(" + message.roomId +"): " + message.text)
+            if (message.messageType === 'UserMessage') {
+                socket.to(message.roomId).emit('chat message', msg);
+                console.log(message.userName + "(" + message.roomId +"): " + message.text)
+            } else {
+                socket.to(message.roomId).emit('chat file message', msg);
+                console.log(message.userName + "(" + message.roomId +"): " + message.fileName)
+            }
         });
     }
 

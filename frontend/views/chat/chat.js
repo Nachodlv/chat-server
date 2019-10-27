@@ -1,12 +1,14 @@
 import User from "../../models/user.js";
-import {Message, MessageType, PrivateMessage} from "../../models/message.js";
+import {Message, MessageType, PrivateMessage, FileMessage, PrivateFileMessage} from "../../models/message.js";
 import {ChatRoom} from "../../models/chat_room.js";
 import {addChatList, onUserStatusChange} from "./user-list/user_list.js";
 
 export function chatInit(socket, user, groups: ChatRoom[], serverSocket) {
     onMessageReceived(socket, user, groups);
+    onFileMessageReceived(socket, user, groups);
     onServerMessage(socket, groups);
     onPrivateMessage(serverSocket, groups, user);
+    onPrivateFileMessage(serverSocket, groups, user);
 }
 
 /*
@@ -34,8 +36,14 @@ function populateHTML(user: User, group: ChatRoom) {
             case MessageType.UserMessage:
                 appendUserMessage(msg, isAuthor);
                 break;
+            case MessageType.Multimedia:
+                appendFileMessage(msg, isAuthor);
+                break;
             case MessageType.PrivateMessage:
                 appendPrivateMessage(msg, isAuthor);
+                break;
+            case MessageType.PrivateMultimedia:
+                appendPrivateFileMessage(msg, isAuthor);
                 break;
             default:
                 appendServerMessage(msg);
@@ -51,17 +59,49 @@ function populateHTML(user: User, group: ChatRoom) {
 function onSubmit(socket, user, group, serverSocket) {
     $('#message-form').unbind('submit').bind('submit', () => {
         const input = $('#m');
-        const message = new Message(input.val(), user.name, MessageType.UserMessage, new Date(), group.id);
-        group.messages.push(message);
-        input.val('');
-        if (message.text[0] === '@') {
-            sendPrivateMessage(message, serverSocket, group.id, user);
-            return false;
-        }
-        appendUserMessage(message, true);
-        socket.emit('chat message', JSON.stringify(message));
-        return false;
+
+        const fileInput = $("input[type=file]");
+        //TODO handle multiple files
+
+        if (fileInput[0].files.length) return onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket);
+        else return onMessageSubmit(input, socket, user, group, serverSocket);
     });
+}
+
+function onMessageSubmit(input, socket, user, group, serverSocket){
+    const message = new Message(input.val(), user.name, MessageType.UserMessage, new Date(), group.id);
+    group.messages.push(message);
+    input.val('');
+    if (message.text[0] === '@') {
+        sendPrivateMessage(message, serverSocket, group.id, user);
+        return false;
+    }
+    appendUserMessage(message, true);
+    socket.emit('chat message', JSON.stringify(message));
+    return false;
+}
+
+function onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket){
+
+    const file = fileInput[0].files[0];
+    const fileReader = new FileReader();
+
+    fileReader.readAsDataURL(file);
+    fileReader.onload = (evt) => {
+        const arrayBuffer = fileReader.result;
+        const msg = new FileMessage(file.name, file.type, file.size, arrayBuffer, input.val(), user.name,
+            MessageType.Multimedia, new Date(), group.id);
+        group.messages.push(msg);
+        input.val('');
+        fileInput.val('');
+        if (msg.text[0] === '@') {
+            sendPrivateFileMessage(msg, serverSocket, group.id, user);
+        } else {
+            appendFileMessage(msg, true);
+            socket.emit('chat message', JSON.stringify(msg));
+        }
+    };
+    return false;
 }
 
 /*
@@ -90,6 +130,37 @@ function appendUserMessage(msg: Message, isAuthor: boolean) {
             return node;
         }));
     window.scrollTo(0, document.body.scrollHeight);
+}
+
+function onFileMessageReceived(socket, user, groups: ChatRoom[]) {
+    socket.on('chat file message', (msgStr) => {
+        const msg: FileMessage = JSON.parse(msgStr);
+        groups.find(group => group.id === msg.roomId).messages.push(msg);
+        console.log(getCurrentRoomId());
+        if (getCurrentRoomId() === msg.roomId) appendFileMessage(msg, msg.userName === user.name);
+    });
+}
+
+function appendFileMessage(msg: FileMessage, isAuthor: boolean) {
+    $('#messages').append($('<li>')
+        .append(() => {
+            const node = $(isAuthor ? '<div class="msg-container author">' : '<div class="msg-container">');
+            if (!isAuthor) node.append($('<p class="author-name">').text(msg.userName));
+            addFileHTML(msg, node);
+            return node;
+        }));
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function addFileHTML(msg, node){
+    if (msg.fileType.includes('image')) node.append($('<div class="file-container">').append($(`<img src="${msg.data}" alt="">`)));
+    else {
+        node.append($('<div class="file-container row align-items-center">')
+            .append($(`<i class="material-icons">`).text('insert_drive_file'))
+            .append($(`<a href="${msg.data}" download="${msg.fileName}">`).text(msg.fileName)));
+    }
+    node.append($('<p>').text(msg.text))
+        .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
 }
 
 /*
@@ -121,20 +192,11 @@ function appendServerMessage(msg: Message) {
 function sendPrivateMessage(message: Message, serverSocket, groupId: number, user: User) {
 
     const onError = (error) => appendServerMessage(new Message(error, '', MessageType.PrivateMessage, new Date(), groupId));
-    let names: string[] = message.text.slice(1).split(new RegExp(", |,"));
-    if (names.length === 0) {
-        onError('@ needs to be followed by the usernames separated by ","');
-        return;
-    }
-    const lastNameWithText = names[names.length - 1];
-    const index = lastNameWithText.indexOf(' ');
-    names[names.length - 1] = lastNameWithText.substr(0, index);
-    names = names.filter(name => user.name !== name);
-    const text: string = lastNameWithText.substr(index);
-    if (!text) {
-        onError('Please add a message to the private message');
-        return;
-    }
+
+    const names = parsePrivateMessage(message, groupId, user, onError);
+
+    if (names.length !== 0) return;
+
     const privateMessage: PrivateMessage = new PrivateMessage(names, text, message.userName,
         MessageType.PrivateMessage, message.timeStamp, message.roomId);
     appendPrivateMessage(privateMessage, true);
@@ -154,9 +216,35 @@ function onPrivateMessage(serverSocket, groups: ChatRoom[], user: User) {
 function appendPrivateMessage(msg: PrivateMessage, isAuthor: boolean) {
     $('#messages').append($('<li>')
         .append(() => {
-            const node = $(isAuthor ? '<div class="msg-container private-message author">' : '<div class="msg-container private-message">');
-            node.append(`
-                <div class="row">
+            const node = addPrivateMessageHTML(msg, isAuthor);
+            node.append($('<p>').text(msg.text))
+                .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
+            return node;
+        }));
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function onPrivateFileMessage(serverSocket, groups: ChatRoom[], user: User) {
+    serverSocket.on('private file message', (message: PrivateFileMessage) => {
+        const group = groups.find(group => group.id === message.roomId);
+        group.messages.push(message);
+        if (getCurrentRoomId() === message.roomId) appendPrivateFileMessage(message, user.name === message.userName);
+    });
+}
+
+function appendPrivateFileMessage(msg: PrivateFileMessage, isAuthor: boolean) {
+    $('#messages').append($('<li>')
+        .append(() => {
+            const node = addPrivateMessageHTML(msg, isAuthor);
+            addFileHTML(msg, node);
+            return node;
+        }));
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function addPrivateMessageHTML(msg, isAuthor) {
+    return $(isAuthor ? '<div class="msg-container private-message author">' : '<div class="msg-container private-message">')
+        .append(`<div class="row">
                     ${!isAuthor ? `<p class="author-name private-message">${msg.userName}</p>` : ''}
                     ${msg.nicknames.length > 1 ? `<div class="dropdown ${isAuthor ? 'dropleft' : ''}">
                         <div class="dropdown-toggle" id="dropdownMenu2"
@@ -168,11 +256,40 @@ function appendPrivateMessage(msg: PrivateMessage, isAuthor: boolean) {
                        </div>
                    </div>` : ''}
                 </div>`);
-            node.append($('<p>').text(msg.text))
-                .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
-            return node;
-        }));
-    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function parsePrivateMessage(message: Message | FileMessage, groupId: number, user: User, errorCallback): string[] {
+    let names: string[] = message.text.slice(1).split(new RegExp(", |,"));
+    if (names.length === 0) {
+        errorCallback('@ needs to be followed by the usernames separated by ","');
+        return [];
+    }
+    const lastNameWithText = names[names.length - 1];
+    const index = lastNameWithText.indexOf(' ');
+    names[names.length - 1] = lastNameWithText.substr(0, index);
+    names = names.filter(name => user.name !== name);
+    const text: string = lastNameWithText.substr(index);
+    if (!text) {
+        errorCallback('Please add a message to the private message');
+        return [];
+    }
+    return names;
+}
+
+function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: number, user: User) {
+
+    const onError = (error) => appendServerMessage(new Message(error, '', MessageType.PrivateMessage, new Date(), groupId));
+
+    const names = parsePrivateMessage(message, groupId, user, onError);
+
+    if (names.length !== 0) return;
+
+    const privateMessage: PrivateMessage = new PrivateFileMessage(names, message.fileName, message.fileType, message.fileSize,
+        message.data, text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
+    appendPrivateFileMessage(privateMessage, true);
+    serverSocket.emit('private message', privateMessage, (error: string) => {
+        onError(error);
+    })
 }
 
 /*

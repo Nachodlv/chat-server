@@ -22,8 +22,26 @@ export const MessageType = {
     ServerMessage: 'ServerMessage',
     ChatInvite: 'ChatInvite',
     UserMessage: 'UserMessage',
-    Multimedia: 'Multimedia'
+    Multimedia: 'Multimedia',
+    PrivateMultimedia: 'PrivateMultimedia'
 };
+
+export class FileMessage extends Message {
+
+    fileName: string;
+    fileType: string;
+    fileSize: string;
+    data: any;
+
+    constructor(fileName: string, fileType: string, fileSize: string, data: any, text: string,
+                userName: string, messageType: string, timeStamp: Date = new Date(), roomId: number) {
+        super(text, userName, messageType, timeStamp, roomId);
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.fileSize = fileSize;
+        this.data = data;
+    }
+}
 
 export class PrivateMessage extends Message {
 
@@ -32,6 +50,17 @@ export class PrivateMessage extends Message {
     constructor(nicknames: string[], text: string, userName: string, messageType: string,
                 timeStamp: Date = new Date(), roomId: number) {
         super(text, userName, messageType, timeStamp, roomId);
+        this.nicknames = nicknames;
+    }
+}
+
+export class PrivateFileMessage extends FileMessage {
+
+    nicknames: string[];
+
+    constructor(nicknames: string[], fileName: string, fileType: string, fileSize: string, data: any, text: string,
+                userName: string, messageType: string, timeStamp: Date = new Date(), roomId: number) {
+        super(fileName, fileType, fileSize, data, text, userName, messageType, timeStamp, roomId);
         this.nicknames = nicknames;
     }
 }

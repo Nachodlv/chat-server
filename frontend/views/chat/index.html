@@ -40,49 +40,55 @@
             <div class="w-100"></div>
             <div class="col">
                 <ul id="messages">
-<!--                    <li>-->
-<!--                        <div class="msg-container private-message author">-->
-<!--                            <p>Default message</p>-->
-<!--                            <p class="time">16:30:10</p>-->
-<!--                        </div>-->
-<!--                    </li>-->
-<!--                    <li>-->
-<!--                        <div class="msg-container private-message">-->
-<!--                            <div class="row"><p class="author-name private-message">Gianni</p>-->
-<!--                                <div class="dropdown">-->
-<!--                                    <div class="dropdown-toggle" id="dropdownMenu2"-->
-<!--                                         data-toggle="dropdown"-->
-<!--                                         aria-haspopup="true" aria-expanded="false">-->
-<!--                                    </div>-->
-<!--                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2" id="user-list">-->
-<!--                                        <div class="dropdown-item">-->
-<!--                                            Ignacio-->
-<!--                                        </div>-->
-<!--                                        <div class="dropdown-item">-->
-<!--                                            Gianni-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                            <p>Default message</p>-->
-<!--                            <p class="time">16:30:20</p>-->
-<!--                        </div>-->
-<!--                    </li>-->
-<!--                    <li>-->
-<!--                        <div class="msg-container">-->
-<!--                            <p class="author-name">Gianni</p>-->
-<!--                            <p>Default message</p>-->
-<!--                            <p class="time">16:30:20</p>-->
-<!--                        </div>-->
-<!--                    </li>-->
-                    <!--                          <li>-->
-                    <!--                              <div class="msg-container server">-->
-                    <!--                                  <p>A user has joined the channel (16:30:20)</p>-->
-                    <!--                              </div>-->
-                    <!--                          </li>-->
+                    <!--<li>
+                        <div class="msg-container private-message author">
+                            <p>Default message</p>
+                            <p class="time">16:30:10</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="msg-container private-message">
+                            <div class="row"><p class="author-name private-message">Gianni</p>
+                                <div class="dropdown">
+                                    <div class="dropdown-toggle" id="dropdownMenu2"
+                                         data-toggle="dropdown"
+                                         aria-haspopup="true" aria-expanded="false">
+                                    </div>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2" id="user-list">
+                                        <div class="dropdown-item">
+                                            Ignacio
+                                        </div>
+                                        <div class="dropdown-item">
+                                            Gianni
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p>Default message</p>
+                            <p class="time">16:30:20</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="msg-container">
+                            <p class="author-name">Gianni</p>
+                            <p>Default message</p>
+                            <p class="time">16:30:20</p>
+                        </div>
+                    </li>
+                                              <li>
+                                                  <div class="msg-container server">
+                                                      <p>A user has joined the channel (16:30:20)</p>
+                                                  </div>
+                                              </li>-->
                 </ul>
-                <form id="message-form" action="">
+                <form id="message-form" class="row" action="">
                     <input id="m" autocomplete="off"/>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="customFile">
+                        <label class="custom-file-label" for="customFile">
+                            Choose file
+                        </label>
+                    </div>
                     <button>Send</button>
                 </form>
             </div>

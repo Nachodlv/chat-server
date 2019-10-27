@@ -1,6 +1,6 @@
 import {ChatRoom} from "../../../models/chat_room.js";
 import User from "../../../models/user.js";
-import {Message} from "../../../models/message.js";
+import {Message, FileMessage} from "../../../models/message.js";
 import {onGroupSelected} from "../chat.js";
 
 export function groupListInit(chatSocket, serverSocket, user, onGroupListReady: (ChatRoom[]) => void) {
@@ -36,11 +36,11 @@ function addGroupList(socket, user: User, groups: ChatRoom[], serverSocket) {
 * Add the user specified in the parameters to the list of users.
 * */
 function addGroup(socket, user: User, group: ChatRoom, serverSocket) {
-    const lastMsg: Message = group.messages[group.messages.length - 1];
+    const lastMsg: FileMessage = group.messages[group.messages.length - 1];
     $('#group-list').append(`
         <li id="li-${group.id}" class="list-group-item list-group-item-primary clickable">
             <p>${group.name}</p>
-            ${lastMsg ? `<p class="last-message">${lastMsg.userName}: ${lastMsg.text}</p>` : ''}
+            ${lastMsg ? `<p class="last-message">${lastMsg.userName}: ${lastMsg.text ? lastMsg.text : lastMsg.fileName}</p>` : ''}
         </li>
     `);
     $(`#li-${group.id}`).on("click", () => onGroupSelected(socket, user, group, serverSocket));
