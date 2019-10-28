@@ -13,6 +13,6 @@ export default class User {
         this.name = name;
         this.online = false;
         this.id = 0;
-        this.chatRooms = [0]; // TODO delete, testing purposes only
+        this.chatRooms = [];
     }
 }

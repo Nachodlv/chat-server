@@ -6,3 +6,25 @@
     text-overflow: ellipsis;
     overflow: hidden;
 }
+
+.list-group-item {
+    background-color: whitesmoke;
+    border: 1px solid lightsteelblue;
+    display: flex;
+}
+
+.group-info {
+    width: 92%;
+}
+
+.active-group {
+    background-color: lightgrey;
+    color: black;
+}
+
+.active-group i {
+    -ms-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg);
+}

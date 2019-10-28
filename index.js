@@ -22,8 +22,6 @@ const ChatRoom = require('./backend/models/chat_room.js');
 const userProvider = new Provider();
 const roomProvider = new Provider();
 const privateMessagesProvider = new Provider();
-const chatRoom = new ChatRoom('Everyone is invited!', 0);
-roomProvider.createModel(chatRoom);
 
 const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname);
 const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessagesProvider, __dirname);

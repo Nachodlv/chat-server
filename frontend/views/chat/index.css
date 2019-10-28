@@ -137,16 +137,6 @@ html, body, .main-container {
     border-radius: 5px 0 0 5px;
 }
 
-#group-list .list-group-item {
-    background-color: whitesmoke;
-    border: 1px solid lightsteelblue;
-    display: flex;
-}
-
-#group-list .group-info {
-    width: 92%;
-}
-
 .clickable{
     cursor: pointer;
 }

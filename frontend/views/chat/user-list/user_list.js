@@ -25,11 +25,9 @@ export function addUser(user: User) {
 
 /*
 * Changes the color of the icon next to the user name depending if it is online or offline.
-* TODO if menu not open it does not work
 * */
 export function onUserStatusChange(userName: string, online: boolean) {
     $(`#${userName} .user-status`)[0].className = getIconClass(online);
-
 }
 
 /*

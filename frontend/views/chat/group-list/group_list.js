@@ -11,14 +11,21 @@ export function groupListInit(chatSocket, serverSocket, user, onGroupListReady: 
 * Gets the ChatRooms a user is part of.
 * */
 function getGroupsForUser(chatSocket, serverSocket, user: User, onGroupListReady: (ChatRoom[]) => void) {
-    const query = user.chatRooms.reduce((prev, curr) => prev + `ids=${curr}&`, '?');
+    if (!user.chatRooms.length) {
+        onGroupListReady([]);
+        addGroupList(chatSocket, user, [], serverSocket);
+        listenToInvites(serverSocket, chatSocket, user, []);
+        onNewGroupFormSubmit(chatSocket, user, [], serverSocket);
+        return;
+    }
+    const query = user.chatRooms.length ? user.chatRooms.reduce((prev, curr) => prev + `ids=${curr}&`, '?') : '?';
     $.get('/chat-rooms' + query.slice(0, query.length - 1), (data) => {
             const groups: ChatRoom[] = JSON.parse(data);
             onGroupListReady(groups);
             addGroupList(chatSocket, user, groups, serverSocket);
             listenToInvites(serverSocket, chatSocket, user, groups);
             onNewGroupFormSubmit(chatSocket, user, groups, serverSocket);
-        }// TODO check if it parses users correctly
+        }
     );
 }
 
@@ -46,7 +53,12 @@ function addGroup(socket, user: User, group: ChatRoom, serverSocket) {
             <i class="material-icons align-self-center">arrow_forward_ios</i>
         </li>
     `);
-    $(`#li-${group.id}`).on("click", () => onGroupSelected(socket, user, group, serverSocket));
+    const node = $(`#li-${group.id}`);
+    node.on("click", () => {
+        $('.active-group').removeClass('active-group');
+        node.addClass('active-group');
+        onGroupSelected(socket, user, group, serverSocket)
+    });
 }
 
 /*
