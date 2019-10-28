@@ -81,7 +81,8 @@ body { font: 13px Helvetica, Arial; }
 }
 
 .header-title {
-    background-color: rgb(130, 224, 255);
+    /*background-color: rgb(130, 224, 255);*/
+    background-color: lightsteelblue;
     height: 50px;
     max-width: unset;
     align-items: center;
@@ -100,17 +101,31 @@ body { font: 13px Helvetica, Arial; }
 }
 
 .group-add{
-    color: darkgreen;
+    /*color: darkgreen;*/
+    color: forestgreen;
     font-size: 32px!important;
-    margin-left: 10px;
+    /*margin-left: 10px;*/
+    background-color: darkgray;
+    border-radius: 0 5px 5px 0;
+    padding: 2px 5px;
 }
 #new-group-form input {
     border: 0;
     padding: 10px;
     background-color: whitesmoke;
-    border-radius: 5px;
+    width: 130px;
+    border-radius: 5px 0 0 5px;
 }
 
+#group-list .list-group-item {
+    background-color: whitesmoke;
+    border: 1px solid lightsteelblue;
+    display: flex;
+}
+
+#group-list .group-info {
+    width: 92%;
+}
 
 .clickable{
     cursor: pointer;

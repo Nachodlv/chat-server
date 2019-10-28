@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="row">
-    <div class="col-4 pl-0">
+    <div class="col-3 pl-0">
         <div class=" header-title container d-flex">
             <h4>Chat rooms</h4>
             <div class="add-group-container">
@@ -23,7 +23,7 @@
         </div>
         <div id="group-list"></div>
     </div>
-    <div class="col-8 pr-0">
+    <div class="col-9 pr-0">
         <div class="row">
             <div class="col">
                 <div class="header-title container d-flex">
@@ -45,47 +45,14 @@
                             <p>Default message</p>
                             <p class="time">16:30:10</p>
                         </div>
-                    </li>
-                    <li>
-                        <div class="msg-container private-message">
-                            <div class="row"><p class="author-name private-message">Gianni</p>
-                                <div class="dropdown">
-                                    <div class="dropdown-toggle" id="dropdownMenu2"
-                                         data-toggle="dropdown"
-                                         aria-haspopup="true" aria-expanded="false">
-                                    </div>
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2" id="user-list">
-                                        <div class="dropdown-item">
-                                            Ignacio
-                                        </div>
-                                        <div class="dropdown-item">
-                                            Gianni
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <p>Default message</p>
-                            <p class="time">16:30:20</p>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="msg-container">
-                            <p class="author-name">Gianni</p>
-                            <p>Default message</p>
-                            <p class="time">16:30:20</p>
-                        </div>
-                    </li>
-                                              <li>
-                                                  <div class="msg-container server">
-                                                      <p>A user has joined the channel (16:30:20)</p>
-                                                  </div>
-                                              </li>-->
+                    </li>-->
                 </ul>
                 <form id="message-form" class="row" action="">
                     <input id="m" autocomplete="off"/>
                     <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="customFile">
-                        <label class="custom-file-label" for="customFile">
+                        <input type="file" class="custom-file-input" id="customFile" maxlength="1"
+                               accept="video/*,image/*,audio/*,.pdf,.doc,.pptx,.zip,.jar.docx,.odt,.pdf,.txt,.xls,.xlsx">
+                        <label id="file-label" class="custom-file-label" for="customFile">
                             Choose file
                         </label>
                     </div>

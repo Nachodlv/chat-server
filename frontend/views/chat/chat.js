@@ -19,6 +19,7 @@ export function onGroupSelected(socket, user, group: ChatRoom, serverSocket) {
     $('#invite-user')[0].hidden = false;
     addChatList(group.users);
     onSubmit(socket, user, group, serverSocket);
+    onFileChosen();
     populateHTML(user, group)
 }
 
@@ -52,22 +53,46 @@ function populateHTML(user: User, group: ChatRoom) {
 }
 
 /*
+* Listener that, when a file is chosen, checks if the size is smaller than 8MB and inserts the file name in the label tag
+* */
+function onFileChosen(){
+    $('input[type=file]').change((ev) => {
+        const file = ev.target.files[0];
+        if (file.size > 8000000) {
+            alert('File size is bigger than 8 MB');
+            ev.target.value = '';
+            return;
+        }
+        $('#file-label').text(ev.target.files[0].name)
+    })
+}
+
+/*
 * Function that handles the form submission.
-* It grabs the value entered by the user and emits it as a Message object.
-* The Message object has some added information used to route and display the message.
+* Validates that the message is not empty.
+* If it is a simple message it calls onMessageSubmit.
+* If it is a message with a file it call onFileMessageSubmit.
 * */
 function onSubmit(socket, user, group, serverSocket) {
     $('#message-form').unbind('submit').bind('submit', () => {
         const input = $('#m');
 
         const fileInput = $("input[type=file]");
-        //TODO handle multiple files
+        const fileLength = fileInput[0].files.length;
 
-        if (fileInput[0].files.length) return onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket);
+        if (!fileLength && input.val() === '') {
+            alert('Message is empty');
+            return false;
+        } else if (fileLength) return onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket);
         else return onMessageSubmit(input, socket, user, group, serverSocket);
     });
 }
 
+/*
+* Function that handles the submission of a simple message.
+* It grabs the value entered by the user and emits it as a Message object.
+* The Message object has some added information used to route and display the message.
+* */
 function onMessageSubmit(input, socket, user, group, serverSocket){
     const message = new Message(input.val(), user.name, MessageType.UserMessage, new Date(), group.id);
     group.messages.push(message);
@@ -81,6 +106,11 @@ function onMessageSubmit(input, socket, user, group, serverSocket){
     return false;
 }
 
+/*
+* Function that handles the submission of a message with a file.
+* It grabs the value and file entered by the user and emits it as a FileMessage object.
+* The FileMessage object has some added information used to route and display the message and file.
+* */
 function onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket){
 
     const file = fileInput[0].files[0];
@@ -94,6 +124,7 @@ function onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket
         group.messages.push(msg);
         input.val('');
         fileInput.val('');
+        $('#file-label').text('Choose file');
         if (msg.text[0] === '@') {
             sendPrivateFileMessage(msg, serverSocket, group.id, user);
         } else {
@@ -153,7 +184,10 @@ function appendFileMessage(msg: FileMessage, isAuthor: boolean) {
 }
 
 function addFileHTML(msg, node){
-    if (msg.fileType.includes('image')) node.append($('<div class="file-container">').append($(`<img src="${msg.data}" alt="">`)));
+    if (msg.fileType.includes('image'))
+        node.append($('<div class="file-container">')
+            .append($(`<a href="${msg.data}" download="${msg.fileName}">`)
+                .append($(`<img src="${msg.data}" alt="">`))));
     else {
         node.append($('<div class="file-container row align-items-center">')
             .append($(`<i class="material-icons">`).text('insert_drive_file'))

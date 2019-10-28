@@ -39,8 +39,11 @@ function addGroup(socket, user: User, group: ChatRoom, serverSocket) {
     const lastMsg: FileMessage = group.messages[group.messages.length - 1];
     $('#group-list').append(`
         <li id="li-${group.id}" class="list-group-item list-group-item-primary clickable">
-            <p>${group.name}</p>
-            ${lastMsg ? `<p class="last-message">${lastMsg.userName}: ${lastMsg.text ? lastMsg.text : lastMsg.fileName}</p>` : ''}
+            <div class="group-info">
+                <p>${group.name}</p>
+                ${lastMsg ? `<p class="last-message">${lastMsg.userName}: ${lastMsg.text ? lastMsg.text : lastMsg.fileName}</p>` : ''}
+             </div>
+            <i class="material-icons align-self-center">arrow_forward_ios</i>
         </li>
     `);
     $(`#li-${group.id}`).on("click", () => onGroupSelected(socket, user, group, serverSocket));
