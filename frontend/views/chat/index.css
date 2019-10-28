@@ -1,8 +1,28 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font: 13px Helvetica, Arial; }
-#message-form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 65.8vw; }
+html, body, .main-container {
+    height: 100%;
+}
+.chat-container {
+    border-left: 1px solid grey;
+    background: url(https://i.imgur.com/RGsYHhj.png) no-repeat;
+    background-size: 100%;
+}
+#message-form {
+    /*background: #000;*/
+    background: grey;
+    padding: 4px;
+    position: fixed;
+    bottom: 0;
+    width: 75vw;
+}
 #message-form input {border: 0; padding: 10px; width: 65%; margin-right: .5%; }
-#message-form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+#message-form button {
+    width: 9.5%;
+    /*background: rgb(130, 224, 255);*/
+    background: lightsteelblue;
+    border: none;
+    padding: 10px; }
 #message-form .custom-file{
     width: 24.5%;
     margin-right: .5%;
@@ -133,5 +153,17 @@ body { font: 13px Helvetica, Arial; }
 
 #invite-user {
     padding-right: 30px;
+}
+
+#invite-user input {
+    border: 0;
+    padding: 10px;
+    background-color: whitesmoke;
+    width: 130px;
+    border-radius: 5px 0 0 5px;
+}
+
+#invite-user .group-add {
+    font-size: 31px!important;
 }
 
