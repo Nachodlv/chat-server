@@ -229,7 +229,10 @@ function sendPrivateMessage(message: Message, serverSocket, groupId: number, use
 
     const names = parsePrivateMessage(message, groupId, user, onError);
 
-    if (names.length !== 0) return;
+    if (names.length === 0) {
+        onError('Invalid input');
+        return;
+    }
 
     const privateMessage: PrivateMessage = new PrivateMessage(names, text, message.userName,
         MessageType.PrivateMessage, message.timeStamp, message.roomId);
@@ -316,9 +319,12 @@ function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: num
 
     const names = parsePrivateMessage(message, groupId, user, onError);
 
-    if (names.length !== 0) return;
+    if (names.length === 0) {
+        onError('Invalid input');
+        return;
+    }
 
-    const privateMessage: PrivateMessage = new PrivateFileMessage(names, message.fileName, message.fileType, message.fileSize,
+    const privateMessage: PrivateFileMessage = new PrivateFileMessage(names, message.fileName, message.fileType, message.fileSize,
         message.data, text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
     appendPrivateFileMessage(privateMessage, true);
     serverSocket.emit('private message', privateMessage, (error: string) => {

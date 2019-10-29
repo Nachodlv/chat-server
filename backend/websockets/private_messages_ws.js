@@ -25,7 +25,7 @@ module.exports = class PrivateMessagesWebSocket {
     * When a private message is received it sends the message to the corresponding users.
     * */
     onWhisper(socket) {
-        socket.on('private message', (message: PrivateMessage, onError: (message: string) => void) => {
+        socket.on('private message', (message: PrivateMessage | PrivateFileMessage, onError: (message: string) => void) => {
             this.privateMessageProvider.createModel(message);
             const room: ChatRoom = this.roomProvider.getModel(message.roomId);
             const users: User[] = room.users;
@@ -42,7 +42,10 @@ module.exports = class PrivateMessagesWebSocket {
                 return
             }
 
-            ids.forEach(id => this.namespace.to(id).emit('private message', message));
+            if (message.messageType === 'PrivateMultimedia')
+                ids.forEach(id => this.namespace.to(id).emit('private file message', message));
+            else ids.forEach(id => this.namespace.to(id).emit('private message', message));
+
             console.log(`${message.nicknames}(${message.userName}): ${message.text}`);
         });
     }

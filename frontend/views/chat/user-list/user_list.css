@@ -6,7 +6,7 @@
     padding: 0 10px 0 10px;
 }
 
-button {
+.dropdown button {
     border: unset!important;
     background-color: white!important;
     color: darkslategrey!important;
