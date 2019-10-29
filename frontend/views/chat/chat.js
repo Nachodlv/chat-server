@@ -66,8 +66,8 @@ function showMessageBar() {
 function onFileChosen(){
     $('input[type=file]').change((ev) => {
         const file = ev.target.files[0];
-        if (file.size > 8000000) {
-            alert('File size is bigger than 8 MB');
+        if (file.size > 1000000) {
+            alert('File size is bigger than 1 MB');
             ev.target.value = '';
             return;
         }
