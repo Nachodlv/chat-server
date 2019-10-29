@@ -236,10 +236,7 @@ function sendPrivateMessage(message: Message, serverSocket, groupId: number, use
 
     const res = parsePrivateMessage(message, groupId, user, onError);
 
-    if (res.names.length === 0) {
-        onError('Invalid input');
-        return;
-    }
+    if (res.names.length === 0) return;
 
     const privateMessage: PrivateMessage = new PrivateMessage(res.names, res.text, message.userName,
         MessageType.PrivateMessage, message.timeStamp, message.roomId);
@@ -306,16 +303,23 @@ function parsePrivateMessage(message: Message | FileMessage, groupId: number, us
     let names: string[] = message.text.slice(1).split(new RegExp(", |,"));
     if (names.length === 0) {
         errorCallback('@ needs to be followed by the usernames separated by ","');
-        return [];
+        return {names: [], text: ''};
     }
     const lastNameWithText = names[names.length - 1];
     const index = lastNameWithText.indexOf(' ');
-    names[names.length - 1] = lastNameWithText.substr(0, index);
+    let text: string = '';
+    if (index !== -1) {
+        names[names.length - 1] = lastNameWithText.substr(0, index);
+        text = lastNameWithText.substr(index);
+    }
     names = names.filter(name => user.name !== name);
-    const text: string = lastNameWithText.substr(index);
-    if (!text) {
+    if (!text && message.messageType !== MessageType.Multimedia) {
         errorCallback('Please add a message to the private message');
-        return [];
+        return {names: [], text: ''};
+    }
+    if (names.length === 0) {
+        errorCallback('You can\'t send a private message to yourself ');
+        return {names: [], text: ''};
     }
     return {names, text};
 }
@@ -326,10 +330,7 @@ function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: num
 
     const res = parsePrivateMessage(message, groupId, user, onError);
 
-    if (res.names.length === 0) {
-        onError('Invalid input');
-        return;
-    }
+    if (res.names.length === 0) return;
 
     const privateMessage: PrivateFileMessage = new PrivateFileMessage(res.names, message.fileName, message.fileType, message.fileSize,
         message.data, res.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
