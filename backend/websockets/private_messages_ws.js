@@ -41,7 +41,6 @@ module.exports = class PrivateMessagesWebSocket {
                 onError(`The user ${errorOnUser} is not present in the room`);
                 return
             }
-
             if (message.messageType === 'PrivateMultimedia')
                 ids.forEach(id => this.namespace.to(id).emit('private file message', message));
             else ids.forEach(id => this.namespace.to(id).emit('private message', message));
