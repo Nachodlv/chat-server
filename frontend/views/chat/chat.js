@@ -150,7 +150,6 @@ function onMessageReceived(socket, user, groups: ChatRoom[]) {
     socket.on('chat message', (msgStr) => {
         const msg: Message = JSON.parse(msgStr);
         groups.find(group => group.id === msg.roomId).messages.push(msg);
-        console.log(getCurrentRoomId());
         if (getCurrentRoomId() === msg.roomId) appendUserMessage(msg, msg.userName === user.name);
     });
 }

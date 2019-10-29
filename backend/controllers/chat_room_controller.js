@@ -97,7 +97,7 @@ class ChatRoomController {
     * */
     _attachPrivateMessage(room: ChatRoom, userNickname: string): ChatRoom {
         const messages: PrivateMessage[] = this.privateMessageProvider.models.filter((message: PrivateMessage) =>
-            message.roomId === room.id && message.nicknames.find(nickname => nickname === userNickname));
+            message.roomId === room.id && (message.userName === userNickname || message.nicknames.find(nickname => nickname === userNickname)));
         const clonedRoom: ChatRoom = JSON.parse(JSON.stringify(room));
         clonedRoom.messages.push(...messages);
         return clonedRoom;
