@@ -284,6 +284,7 @@ function appendPrivateFileMessage(msg: PrivateFileMessage, isAuthor: boolean) {
 }
 
 function addPrivateMessageHTML(msg, isAuthor) {
+    console.log(msg.nicknames);
     return $(isAuthor ? '<div class="msg-container private-message author">' : '<div class="msg-container private-message">')
         .append(`<div class="row">
                     ${!isAuthor ? `<p class="author-name private-message">${msg.userName}</p>` : ''}
@@ -293,7 +294,7 @@ function addPrivateMessageHTML(msg, isAuthor) {
                              aria-haspopup="true" aria-expanded="false">
                         </div>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenu2" id="user-list">
-                            ${msg.nicknames.map(nickname => `<div class="dropdown-item">${nickname}</div>`).join()}
+                            ${msg.nicknames.map(nickname => `<div class="dropdown-item">${nickname}</div>`).join('')}
                        </div>
                    </div>` : ''}
                 </div>`);

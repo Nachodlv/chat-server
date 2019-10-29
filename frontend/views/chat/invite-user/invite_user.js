@@ -33,10 +33,10 @@ function inviteUser(serverSocket, rooms: ChatRoom[]) {
             return;
         }
         const room = rooms.find(r => r.id === roomId);
-        const currentRoom = getCurrentRoomId(); // TODO move back to where it was before
-        if (currentRoom === roomId) addUser(user); // TODO move back to where it was before
         if (!room) return;
-        room.users.push(user);// TODO the array of rooms is not updated when new room is created
+        room.users.push(user);
+        const currentRoom = getCurrentRoomId();
+        if (currentRoom === roomId) addUser(user);
     });
     return false;
 }
