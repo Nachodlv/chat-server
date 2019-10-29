@@ -20,7 +20,8 @@ export function onGroupSelected(socket, user, group: ChatRoom, serverSocket) {
     addChatList(group.users);
     onSubmit(socket, user, group, serverSocket);
     onFileChosen();
-    populateHTML(user, group)
+    populateHTML(user, group);
+    showMessageBar();
 }
 
 function populateHTML(user: User, group: ChatRoom) {
@@ -50,6 +51,13 @@ function populateHTML(user: User, group: ChatRoom) {
                 appendServerMessage(msg);
         }
     })
+}
+
+/*
+* Un-hides the message bar when group is selected.
+* */
+function showMessageBar() {
+    $('#message-form:hidden')[0].style['display'] = 'flex'
 }
 
 /*
@@ -227,14 +235,14 @@ function sendPrivateMessage(message: Message, serverSocket, groupId: number, use
 
     const onError = (error) => appendServerMessage(new Message(error, '', MessageType.PrivateMessage, new Date(), groupId));
 
-    const names = parsePrivateMessage(message, groupId, user, onError);
+    const res = parsePrivateMessage(message, groupId, user, onError);
 
-    if (names.length === 0) {
+    if (res.names.length === 0) {
         onError('Invalid input');
         return;
     }
 
-    const privateMessage: PrivateMessage = new PrivateMessage(names, message.text, message.userName,
+    const privateMessage: PrivateMessage = new PrivateMessage(res.names, res.text, message.userName,
         MessageType.PrivateMessage, message.timeStamp, message.roomId);
     appendPrivateMessage(privateMessage, true);
     serverSocket.emit('private message', privateMessage, (error: string) => {
@@ -295,7 +303,7 @@ function addPrivateMessageHTML(msg, isAuthor) {
                 </div>`);
 }
 
-function parsePrivateMessage(message: Message | FileMessage, groupId: number, user: User, errorCallback): string[] {
+function parsePrivateMessage(message: Message | FileMessage, groupId: number, user: User, errorCallback): {names:string[], text:string} {
     let names: string[] = message.text.slice(1).split(new RegExp(", |,"));
     if (names.length === 0) {
         errorCallback('@ needs to be followed by the usernames separated by ","');
@@ -310,22 +318,22 @@ function parsePrivateMessage(message: Message | FileMessage, groupId: number, us
         errorCallback('Please add a message to the private message');
         return [];
     }
-    return names;
+    return {names, text};
 }
 
 function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: number, user: User) {
 
     const onError = (error) => appendServerMessage(new Message(error, '', MessageType.PrivateMessage, new Date(), groupId));
 
-    const names = parsePrivateMessage(message, groupId, user, onError);
+    const res = parsePrivateMessage(message, groupId, user, onError);
 
-    if (names.length === 0) {
+    if (res.names.length === 0) {
         onError('Invalid input');
         return;
     }
 
-    const privateMessage: PrivateFileMessage = new PrivateFileMessage(names, message.fileName, message.fileType, message.fileSize,
-        message.data, message.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
+    const privateMessage: PrivateFileMessage = new PrivateFileMessage(res.names, message.fileName, message.fileType, message.fileSize,
+        message.data, res.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
     appendPrivateFileMessage(privateMessage, true);
     serverSocket.emit('private message', privateMessage, (error: string) => {
         onError(error);
