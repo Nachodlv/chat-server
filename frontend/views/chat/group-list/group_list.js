@@ -1,6 +1,6 @@
 import {ChatRoom} from "../../../models/chat_room.js";
 import User from "../../../models/user.js";
-import {Message, FileMessage} from "../../../models/message.js";
+import {FileMessage} from "../../../models/message.js";
 import {onGroupSelected} from "../chat.js";
 
 export function groupListInit(chatSocket, serverSocket, user, onGroupListReady: (ChatRoom[]) => void) {
@@ -11,16 +11,17 @@ export function groupListInit(chatSocket, serverSocket, user, onGroupListReady: 
 * Gets the ChatRooms a user is part of.
 * */
 function getGroupsForUser(chatSocket, serverSocket, user: User, onGroupListReady: (ChatRoom[]) => void) {
+    let groups = [];
     if (!user.chatRooms.length) {
-        onGroupListReady([]);
-        addGroupList(chatSocket, user, [], serverSocket);
-        listenToInvites(serverSocket, chatSocket, user, []);
-        onNewGroupFormSubmit(chatSocket, user, [], serverSocket);
+        onGroupListReady(groups);
+        addGroupList(chatSocket, user, groups, serverSocket);
+        listenToInvites(serverSocket, chatSocket, user, groups);
+        onNewGroupFormSubmit(chatSocket, user, groups, serverSocket);
         return;
     }
     const query = user.chatRooms.length ? user.chatRooms.reduce((prev, curr) => prev + `ids=${curr}&`, '?') : '?';
     $.get('/chat-rooms' + query.slice(0, query.length - 1), (data) => {
-            const groups: ChatRoom[] = JSON.parse(data);
+            groups = JSON.parse(data);
             onGroupListReady(groups);
             addGroupList(chatSocket, user, groups, serverSocket);
             listenToInvites(serverSocket, chatSocket, user, groups);
