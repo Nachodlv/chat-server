@@ -234,7 +234,7 @@ function sendPrivateMessage(message: Message, serverSocket, groupId: number, use
         return;
     }
 
-    const privateMessage: PrivateMessage = new PrivateMessage(names, text, message.userName,
+    const privateMessage: PrivateMessage = new PrivateMessage(names, message.text, message.userName,
         MessageType.PrivateMessage, message.timeStamp, message.roomId);
     appendPrivateMessage(privateMessage, true);
     serverSocket.emit('private message', privateMessage, (error: string) => {
@@ -325,7 +325,7 @@ function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: num
     }
 
     const privateMessage: PrivateFileMessage = new PrivateFileMessage(names, message.fileName, message.fileType, message.fileSize,
-        message.data, text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
+        message.data, message.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
     appendPrivateFileMessage(privateMessage, true);
     serverSocket.emit('private message', privateMessage, (error: string) => {
         onError(error);
