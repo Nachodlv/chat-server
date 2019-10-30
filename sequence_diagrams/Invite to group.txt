@@ -1,0 +1,57 @@
+title Invite to group
+
+User -> TextInput: "Ignacio"
+User -> AddUserButton: press
+activate AddUserButton
+AddUserButton -> invite_user.js: inviteUser
+activate invite_user.js
+invite_user.js ->TextInput: getValue
+activate TextInput
+TextInput -->invite_user.js: "Ignacio"
+deactivate TextInput
+invite_user.js -> chat.js: getCurrentRoomId
+activate chat.js
+chat.js -->invite_user.js: 0
+deactivate chat.js
+
+invite_user.js ->(2) ChatFunctionsWebSocket: emit 'invite'
+deactivate invite_user.js
+activate ChatFunctionsWebSocket
+ChatFunctionsWebSocket -> Provider: getModel
+activate Provider
+Provider -->ChatFunctionsWebSocket: room
+deactivate Provider
+ChatFunctionsWebSocket ->Provider: getModels
+activate Provider
+Provider -->ChatFunctionsWebSocket: users
+deactivate Provider
+ChatFunctionsWebSocket ->invite_user.js: user
+activate invite_user.js
+invite_user.js -> user_list.js: addUser
+activate user_list.js
+user_list.js -->invite_user.js: 
+deactivate user_list.js
+invite_user.js -->ChatFunctionsWebSocket:
+deactivate invite_user.js
+
+
+ChatFunctionsWebSocket -> ChatWebSocket: sendMessageToChat
+activate ChatWebSocket
+ChatWebSocket ->(2)chat.js: emit 'server message'
+activate chat.js
+ChatWebSocket -->ChatFunctionsWebSocket:
+deactivate ChatWebSocket
+chat.js ->chat.js: appendServerMessage
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+deactivate chat.js
+
+ChatFunctionsWebSocket ->(2)group_list.js: emit 'invite'
+deactivate ChatFunctionsWebSocket
+activate group_list.js
+group_list.js ->group_list.js: addGroup
+activate group_list.js
+group_list.js -->group_list.js:
+deactivate group_list.js
+deactivate group_list.js

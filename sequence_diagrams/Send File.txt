@@ -1,0 +1,44 @@
+title Send file
+
+User -> ImageInput: hello.pdf
+User -> SendButton: press
+activate SendButton
+SendButton ->chat.js: onSubmit
+activate chat.js
+chat.js ->ImageInput: value
+activate ImageInput
+ImageInput -->chat.js: hello.pdf
+deactivate ImageInput
+chat.js ->chat.js: onFileMessageSubmit
+activate chat.js
+chat.js --> *FileMessage: <<create>>
+chat.js ->chat.js: appendFileMessage
+activate chat.js
+chat.js ->(2) ChatWebSocket: emit 'chat message'
+activate ChatWebSocket
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->SendButton:
+deactivate chat.js
+SendButton -->User:
+deactivate SendButton
+
+ChatWebSocket -> Provider: getModel
+activate Provider
+Provider -->ChatWebSocket: room
+deactivate Provider
+
+ChatWebSocket ->(2)chat.js: emit 'chat file message'
+deactivate ChatWebSocket
+activate chat.js
+chat.js ->chat.js: getCurrentRoomId
+activate chat.js
+chat.js -->chat.js: roomId
+deactivate chat.js
+chat.js ->chat.js: appendFileMessage
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+deactivate chat.js
