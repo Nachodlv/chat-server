@@ -1,0 +1,83 @@
+title Selecting a Group / Changing active Group
+actor User
+
+User -> ListItem: press
+activate ListItem
+ListItem ->chat.js: onGroupSelected
+activate chat.js
+
+chat.js ->(2)user_list.js: addChatList
+activate user_list.js
+loop
+activate user_list.js
+user_list.js ->user_list.js: addUser
+user_list.js -->user_list.js:
+deactivate user_list.js
+end
+user_list.js -->chat.js:
+deactivate user_list.js
+
+chat.js ->chat.js: onSubmit
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+
+chat.js ->chat.js: onFileChosen
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+
+chat.js ->chat.js: populateHTML
+activate chat.js
+loop
+alt case user message
+chat.js ->chat.js: appendUserMessage
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+else case file message
+chat.js ->chat.js: appendFileMessage
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+else case private user message
+chat.js ->chat.js: appendPrivateMessage
+activate chat.js
+chat.js ->chat.js:addPrivateMessageHTML
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+else case private file message
+chat.js ->chat.js: appendPrivateFileMessage
+activate chat.js
+chat.js ->chat.js:addPrivateMessageHTML
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+else case server message
+chat.js ->chat.js: appendServerMessage
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+end
+chat.js -->chat.js:
+deactivate chat.js
+end
+
+chat.js ->chat.js: showUserInvite
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+
+chat.js ->chat.js: showMessageBar
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+
+chat.js -->ListItem:
+deactivate chat.js
+ListItem -->User:

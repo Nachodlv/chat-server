@@ -1,0 +1,75 @@
+title Send private file
+
+actor User
+User -> TextInput: @Nacho hola
+User -> ImageInput: hello.pdf
+User -> SendButton: press
+activate SendButton
+SendButton ->chat.js: onSubmit
+activate chat.js
+chat.js ->ImageInput: value
+activate ImageInput
+ImageInput -->chat.js: hello.pdf
+deactivate ImageInput
+chat.js ->TextInput: value
+activate TextInput
+TextInput -->chat.js: @Nacho hola
+deactivate TextInput
+chat.js ->chat.js: onFileMessageSubmit
+activate chat.js
+chat.js --> *FileMessage: <<create>>
+chat.js ->chat.js: sendPrivateFileMessage
+activate chat.js
+chat.js ->chat.js: parsePrivateMessage
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js --> *PrivateFileMessage: <<create>>
+chat.js ->chat.js: appendPrivateFileMessage
+activate chat.js
+chat.js ->chat.js: addPrivateMessageHTML
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js ->(2) ServerSocket: emit 'private message'
+activate ServerSocket
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->SendButton:
+deactivate chat.js
+SendButton -->User:
+deactivate SendButton
+
+ServerSocket -> PrivateMessageProvider: createModel
+activate PrivateMessageProvider
+ServerSocket -> Provider: getModel
+deactivate PrivateMessageProvider
+activate Provider
+Provider -->ServerSocket: room
+deactivate Provider
+
+ServerSocket ->(2)chat.js: emit 'private file message'
+deactivate ServerSocket
+
+activate chat.js
+chat.js ->chat.js: getCurrentRoomId
+activate chat.js
+chat.js -->chat.js: roomId
+deactivate chat.js
+chat.js ->chat.js:appendPrivateFileMessage
+activate chat.js
+chat.js ->chat.js: addPrivateMessageHTML
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js ->chat.js: addFileHTML
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:

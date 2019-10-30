@@ -1,0 +1,65 @@
+title Send private message
+actor User
+User -> TextInput: "@Nacho Hello"
+User -> SendButton: press
+activate SendButton
+SendButton ->chat.js: onSubmit
+activate chat.js
+chat.js ->TextInput: value
+activate TextInput
+TextInput -->chat.js: "@Nacho Hello"
+deactivate TextInput
+chat.js ->chat.js: onMessageSubmit
+activate chat.js
+chat.js --> *Message: <<create>>
+chat.js ->chat.js: sendPrivateMessage
+activate chat.js
+chat.js ->chat.js: parsePrivateMessage
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js --> *PrivateMessage: <<create>>
+chat.js ->chat.js: appendPrivateMessage
+activate chat.js
+chat.js ->chat.js: addPrivateMessageHTML
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js ->(2) ServerSocket: emit 'private message'
+activate ServerSocket
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->SendButton:
+deactivate chat.js
+SendButton -->User:
+deactivate SendButton
+
+ServerSocket -> PrivateMessageProvider: createModel
+activate PrivateMessageProvider
+ServerSocket -> Provider: getModel
+deactivate PrivateMessageProvider
+activate Provider
+Provider -->ServerSocket: room
+deactivate Provider
+
+ServerSocket ->(2)chat.js: emit 'private message'
+deactivate ServerSocket
+
+activate chat.js
+chat.js ->chat.js: getCurrentRoomId
+activate chat.js
+chat.js -->chat.js: roomId
+deactivate chat.js
+chat.js ->chat.js:appendPrivateMessage
+activate chat.js
+chat.js ->chat.js: addPrivateMessageHTML
+activate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
+deactivate chat.js
+chat.js -->chat.js:
