@@ -1,6 +1,10 @@
 import {CookieService} from "./cookie-service.js";
 import User from "../models/user.js";
 
+/*
+* Service used to handle user authorization.
+* It checks the cookies to see if a user is logged in or not.
+* */
 export class AuthService {
     static isAuthorized(onSuccess: (User) => void, onFailure: () => void): void {
         const cookie = CookieService.getCookie('user');

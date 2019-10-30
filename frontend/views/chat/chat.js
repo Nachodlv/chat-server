@@ -3,6 +3,9 @@ import {Message, MessageType, PrivateMessage, FileMessage, PrivateFileMessage} f
 import {ChatRoom} from "../../models/chat_room.js";
 import {addChatList, onUserStatusChange} from "./user-list/user_list.js";
 
+/*
+* Function that initializes the message received listeners.
+* */
 export function chatInit(socket, user, groups: ChatRoom[], serverSocket) {
     onMessageReceived(socket, user, groups);
     onFileMessageReceived(socket, user, groups);
@@ -12,18 +15,22 @@ export function chatInit(socket, user, groups: ChatRoom[], serverSocket) {
 }
 
 /*
-* It initializes the socket at a given namespace and room.
-* It initializes the form submit and message received listeners.
+* Function that initializes the form submit and file chosen listeners.
 * */
 export function onGroupSelected(socket, user, group: ChatRoom, serverSocket) {
-    $('#invite-user')[0].hidden = false;
     addChatList(group.users);
     onSubmit(socket, user, group, serverSocket);
     onFileChosen();
     populateHTML(user, group);
+    showUserInvite();
     showMessageBar();
 }
 
+/*
+* Function that adds the information of a group to the HTML.
+* It adds the id, the name and the messages of the group.
+* The format of the message depends on its type.
+* */
 function populateHTML(user: User, group: ChatRoom) {
     $('#chat-group-name').text(group.name);
     $('#chat-group-id').text(group.id);
@@ -54,14 +61,21 @@ function populateHTML(user: User, group: ChatRoom) {
 }
 
 /*
-* Un-hides the message bar when group is selected.
+* Function that un-hides the user invite input when group is selected.
+* */
+function showUserInvite() {
+    $('#invite-user')[0].hidden = false;
+}
+
+/*
+* Function that un-hides the message bar when group is selected.
 * */
 function showMessageBar() {
     $('#message-form:hidden')[0].style['display'] = 'flex'
 }
 
 /*
-* Listener that, when a file is chosen, checks if the size is smaller than 8MB and inserts the file name in the label tag
+* Listener that, when a file is chosen, checks if the size is smaller than 1MB and inserts the file name in the label tag
 * */
 function onFileChosen(){
     $('input[type=file]').change((ev) => {
@@ -100,6 +114,9 @@ function onSubmit(socket, user, group, serverSocket) {
 * Function that handles the submission of a simple message.
 * It grabs the value entered by the user and emits it as a Message object.
 * The Message object has some added information used to route and display the message.
+* Checks the first char to see if its a private message.
+* If it is a simple message it calls appendUserMessage.
+* If it is a private message it calls sendPrivateMessage.
 * */
 function onMessageSubmit(input, socket, user, group, serverSocket){
     const message = new Message(input.val(), user.name, MessageType.UserMessage, new Date(), group.id);
@@ -144,6 +161,44 @@ function onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket
 }
 
 /*
+* Function that emits a private message on a given namespace and roomId
+* */
+function sendPrivateMessage(message: Message, serverSocket, groupId: number, user: User) {
+
+    const onError = (error) => appendServerMessage(new Message(error, '', MessageType.PrivateMessage, new Date(), groupId));
+
+    const res = parsePrivateMessage(message, groupId, user, onError);
+
+    if (res.names.length === 0) return;
+
+    const privateMessage: PrivateMessage = new PrivateMessage(res.names, res.text, message.userName,
+        MessageType.PrivateMessage, message.timeStamp, message.roomId);
+    appendPrivateMessage(privateMessage, true);
+    serverSocket.emit('private message', privateMessage, (error: string) => {
+        onError(error);
+    })
+}
+
+/*
+* Function that emits a private file message on a given namespace and roomId
+* */
+function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: number, user: User) {
+
+    const onError = (error) => appendServerMessage(new Message(error, '', MessageType.PrivateMessage, new Date(), groupId));
+
+    const res = parsePrivateMessage(message, groupId, user, onError);
+
+    if (res.names.length === 0) return;
+
+    const privateMessage: PrivateFileMessage = new PrivateFileMessage(res.names, message.fileName, message.fileType, message.fileSize,
+        message.data, res.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
+    appendPrivateFileMessage(privateMessage, true);
+    serverSocket.emit('private message', privateMessage, (error: string) => {
+        onError(error);
+    })
+}
+
+/*
 * Listener that is called when a user message is sent to this specific roomId and namespace.
 * */
 function onMessageReceived(socket, user, groups: ChatRoom[]) {
@@ -155,7 +210,7 @@ function onMessageReceived(socket, user, groups: ChatRoom[]) {
 }
 
 /*
-* It appends a <li> to the html containing the user message.
+* Function that appends a <li> to the html containing the user message.
 * The way the message is presented changes according to the author of the message.
 * */
 function appendUserMessage(msg: Message, isAuthor: boolean) {
@@ -170,6 +225,9 @@ function appendUserMessage(msg: Message, isAuthor: boolean) {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
+/*
+* Listener that is called when a user message with a file is sent to this specific roomId and namespace.
+* */
 function onFileMessageReceived(socket, user, groups: ChatRoom[]) {
     socket.on('chat file message', (msgStr) => {
         const msg: FileMessage = JSON.parse(msgStr);
@@ -179,6 +237,10 @@ function onFileMessageReceived(socket, user, groups: ChatRoom[]) {
     });
 }
 
+/*
+* Function that appends a <li> to the html containing the user message with a file.
+* The way the message is presented changes according to the author of the message.
+* */
 function appendFileMessage(msg: FileMessage, isAuthor: boolean) {
     $('#messages').append($('<li>')
         .append(() => {
@@ -188,20 +250,6 @@ function appendFileMessage(msg: FileMessage, isAuthor: boolean) {
             return node;
         }));
     window.scrollTo(0, document.body.scrollHeight);
-}
-
-function addFileHTML(msg, node){
-    if (msg.fileType.includes('image'))
-        node.append($('<div class="file-container">')
-            .append($(`<a href="${msg.data}" download="${msg.fileName}">`)
-                .append($(`<img src="${msg.data}" alt="">`))));
-    else {
-        node.append($('<div class="file-container row align-items-center">')
-            .append($(`<i class="material-icons">`).text('insert_drive_file'))
-            .append($(`<a href="${msg.data}" download="${msg.fileName}">`).text(msg.fileName)));
-    }
-    node.append($('<p>').text(msg.text))
-        .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
 }
 
 /*
@@ -222,7 +270,7 @@ function onServerMessage(socket, groups: ChatRoom[]) {
 }
 
 /*
-* It appends a <li> to the html containing the server message.
+* Function that appends a <li> to the html containing the server message.
 * */
 function appendServerMessage(msg: Message) {
     $('#messages').append($('<li>').append($('<div class="msg-container server">')
@@ -230,22 +278,9 @@ function appendServerMessage(msg: Message) {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
-function sendPrivateMessage(message: Message, serverSocket, groupId: number, user: User) {
-
-    const onError = (error) => appendServerMessage(new Message(error, '', MessageType.PrivateMessage, new Date(), groupId));
-
-    const res = parsePrivateMessage(message, groupId, user, onError);
-
-    if (res.names.length === 0) return;
-
-    const privateMessage: PrivateMessage = new PrivateMessage(res.names, res.text, message.userName,
-        MessageType.PrivateMessage, message.timeStamp, message.roomId);
-    appendPrivateMessage(privateMessage, true);
-    serverSocket.emit('private message', privateMessage, (error: string) => {
-        onError(error);
-    })
-}
-
+/*
+* Listener that is called when a private message is sent to this specific roomId and namespace.
+* */
 function onPrivateMessage(serverSocket, groups: ChatRoom[], user: User) {
     serverSocket.on('private message', (message: Message) => {
         const group = groups.find(group => group.id === message.roomId);
@@ -254,6 +289,9 @@ function onPrivateMessage(serverSocket, groups: ChatRoom[], user: User) {
     });
 }
 
+/*
+* Function that appends a <li> to the html containing the private message.
+* */
 function appendPrivateMessage(msg: PrivateMessage, isAuthor: boolean) {
     $('#messages').append($('<li>')
         .append(() => {
@@ -265,6 +303,9 @@ function appendPrivateMessage(msg: PrivateMessage, isAuthor: boolean) {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
+/*
+* Listener that is called when a private message with a file is sent to this specific roomId and namespace.
+* */
 function onPrivateFileMessage(serverSocket, groups: ChatRoom[], user: User) {
     serverSocket.on('private file message', (message: PrivateFileMessage) => {
         const group = groups.find(group => group.id === message.roomId);
@@ -273,6 +314,9 @@ function onPrivateFileMessage(serverSocket, groups: ChatRoom[], user: User) {
     });
 }
 
+/*
+* Function that appends a <li> to the html containing the private file message.
+* */
 function appendPrivateFileMessage(msg: PrivateFileMessage, isAuthor: boolean) {
     $('#messages').append($('<li>')
         .append(() => {
@@ -283,6 +327,28 @@ function appendPrivateFileMessage(msg: PrivateFileMessage, isAuthor: boolean) {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
+/*
+* Function that appends the file, date and the text of the message.
+* If the file is an image it appends a preview of such image.
+* */
+function addFileHTML(msg, node){
+    if (msg.fileType.includes('image'))
+        node.append($('<div class="file-container">')
+            .append($(`<a href="${msg.data}" download="${msg.fileName}">`)
+                .append($(`<img src="${msg.data}" alt="">`))));
+    else {
+        node.append($('<div class="file-container row align-items-center">')
+            .append($(`<i class="material-icons">`).text('insert_drive_file'))
+            .append($(`<a href="${msg.data}" download="${msg.fileName}">`).text(msg.fileName)));
+    }
+    node.append($('<p>').text(msg.text))
+        .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
+}
+
+/*
+* Function that appends the header of a private message.
+* If the message is a multicast it appends a dropdown containing the names of the recipients.
+* */
 function addPrivateMessageHTML(msg, isAuthor) {
     console.log(msg.nicknames);
     return $(isAuthor ? '<div class="msg-container private-message author">' : '<div class="msg-container private-message">')
@@ -300,6 +366,29 @@ function addPrivateMessageHTML(msg, isAuthor) {
                 </div>`);
 }
 
+/*
+* Function that parses the user input of a private message (it starts with '@')
+* The following formats are correct:
+* '@name1, name2, name3, name4 message'
+* or
+* '@name message'
+* or
+* '@name' (only if the message has a file)
+* The function splits the input value by the ', ' or ',' character.
+* Then the last element of the generated array contains a name and the message text.
+* The function splits the last element by the ' ' character.
+* Finally the function returns the names array and the text.
+* The following formats are incorrect:
+* '@name1, name2, name3, message'
+* or
+* '@name1, @name2, @name3, message'
+* or
+* '@name1 @name2 @name3 message'
+* or
+* '@name1 name2 name3 message'
+* or
+* '@name '
+* */
 function parsePrivateMessage(message: Message | FileMessage, groupId: number, user: User, errorCallback): {names:string[], text:string} {
     let names: string[] = message.text.slice(1).split(new RegExp(", |,"));
     if (names.length === 0) {
@@ -323,22 +412,6 @@ function parsePrivateMessage(message: Message | FileMessage, groupId: number, us
         return {names: [], text: ''};
     }
     return {names, text};
-}
-
-function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: number, user: User) {
-
-    const onError = (error) => appendServerMessage(new Message(error, '', MessageType.PrivateMessage, new Date(), groupId));
-
-    const res = parsePrivateMessage(message, groupId, user, onError);
-
-    if (res.names.length === 0) return;
-
-    const privateMessage: PrivateFileMessage = new PrivateFileMessage(res.names, message.fileName, message.fileType, message.fileSize,
-        message.data, res.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
-    appendPrivateFileMessage(privateMessage, true);
-    serverSocket.emit('private message', privateMessage, (error: string) => {
-        onError(error);
-    })
 }
 
 /*

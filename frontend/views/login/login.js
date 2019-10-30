@@ -59,6 +59,9 @@ function createUser(nickname): void {
     });
 }
 
+/*
+* Function that display an error message
+* */
 function showError(error: string) {
     const errorDiv = $('#error')[0];
    errorDiv.style['display'] = 'inherit';

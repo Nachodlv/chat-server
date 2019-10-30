@@ -27,6 +27,9 @@ class ChatWebSocket {
         });
     }
 
+    /*
+    * Joins the socket to a roomId
+    * */
     onJoin(socket) {
         socket.on('join', (roomId) => {
             socket.join(roomId);
