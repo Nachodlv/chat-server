@@ -8,6 +8,10 @@ import {groupListInit} from "./group-list/group_list.js";
 import {chatInit} from "./chat.js";
 import {addInviteUserInput} from "./invite-user/invite_user.js";
 
+/*
+* Function that is called when the file is imported.
+* Checks if a user is logged in, if not it redirects them to the login page.
+* */
 $(function () {
     AuthService.isAuthorized(init, () => {
         window.location.href = '/login';
@@ -17,7 +21,9 @@ $(function () {
 });
 
 /*
-* Gets chat rooms for logged user
+* Function called after user is authorized.
+* It initializes the socket at a given namespace and room.
+* It initializes the group list, and then the group chat and invite user input
 * */
 function init(user: User) {
     const serverSocket = io('/', {query: "userId=" + user.id});

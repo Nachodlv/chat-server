@@ -3,14 +3,10 @@ import User from "../../../models/user.js";
 import {FileMessage} from "../../../models/message.js";
 import {onGroupSelected} from "../chat.js";
 
-export function groupListInit(chatSocket, serverSocket, user, onGroupListReady: (ChatRoom[]) => void) {
-    getGroupsForUser(chatSocket, serverSocket, user, onGroupListReady);
-}
-
 /*
 * Gets the ChatRooms a user is part of.
 * */
-function getGroupsForUser(chatSocket, serverSocket, user: User, onGroupListReady: (ChatRoom[]) => void) {
+export function groupListInit(chatSocket, serverSocket, user, onGroupListReady: (ChatRoom[]) => void) {
     let groups = [];
     if (!user.chatRooms.length) {
         onGroupListReady(groups);
