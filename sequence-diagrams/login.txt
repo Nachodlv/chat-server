@@ -1,5 +1,5 @@
 title Login
-
+actor User
 User -> TextInput: "Ignacio"
 User -> SendButton: press
 activate SendButton

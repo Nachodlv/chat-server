@@ -1,5 +1,5 @@
 title Invite to group
-
+actor User
 User -> TextInput: "Ignacio"
 User -> AddUserButton: press
 activate AddUserButton

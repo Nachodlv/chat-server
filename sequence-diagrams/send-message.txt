@@ -1,18 +1,18 @@
-title Send file
-
-User -> ImageInput: hello.pdf
+title Send message
+actor User
+User -> TextInput: "Hello"
 User -> SendButton: press
 activate SendButton
 SendButton ->chat.js: onSubmit
 activate chat.js
-chat.js ->ImageInput: value
-activate ImageInput
-ImageInput -->chat.js: hello.pdf
-deactivate ImageInput
-chat.js ->chat.js: onFileMessageSubmit
+chat.js ->TextInput: value
+activate TextInput
+TextInput -->chat.js: "Hello"
+deactivate TextInput
+chat.js ->chat.js: onMessageSubmit
 activate chat.js
-chat.js --> *FileMessage: <<create>>
-chat.js ->chat.js: appendFileMessage
+chat.js --> *Message: <<create>>
+chat.js ->chat.js: appendUserMessage
 activate chat.js
 chat.js ->(2) ChatWebSocket: emit 'chat message'
 activate ChatWebSocket
@@ -30,15 +30,15 @@ activate Provider
 Provider -->ChatWebSocket: room
 deactivate Provider
 
-ChatWebSocket ->(2)chat.js: emit 'chat file message'
+ChatWebSocket ->(2)chat.js: emit 'chat message'
 deactivate ChatWebSocket
 activate chat.js
 chat.js ->chat.js: getCurrentRoomId
 activate chat.js
 chat.js -->chat.js: roomId
 deactivate chat.js
-chat.js ->chat.js: appendFileMessage
+chat.js ->chat.js: appendUserMessage
 activate chat.js
 chat.js -->chat.js:
 deactivate chat.js
-deactivate chat.js
+deactivate chat.js'

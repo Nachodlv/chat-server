@@ -1,5 +1,5 @@
 title New group
-
+actor User
 User -> TextInput: "Group 1"
 User -> CreateGroupButton: press
 activate CreateGroupButton
