@@ -1,0 +1,31 @@
+title New group
+
+User -> TextInput: "Group 1"
+User -> CreateGroupButton: press
+activate CreateGroupButton
+CreateGroupButton -> invite_user.js: processSubmit
+activate invite_user.js
+invite_user.js ->TextInput: getValue
+activate TextInput
+TextInput -->invite_user.js: "Group 1"
+deactivate TextInput
+invite_user.js ->(2) ChatRoomController: POST: newChatRoom
+activate ChatRoomController
+invite_user.js -->CreateGroupButton:
+deactivate CreateGroupButton
+
+
+ChatRoomController -> Provider: createModel
+activate Provider
+Provider -->ChatRoomController: room
+deactivate Provider
+ChatRoomController -->(2)invite_user.js: room
+deactivate ChatRoomController
+invite_user.js ->invite_user.js: addGroup
+activate invite_user.js
+invite_user.js -->invite_user.js:
+deactivate invite_user.js
+invite_user.js ->(2) ChatWebSocket: emit 'join'
+deactivate invite_user.js
+
+note right of ChatWebSocket: the socket joins\nthe room id

@@ -1,0 +1,31 @@
+title Login
+
+User -> TextInput: "Ignacio"
+User -> SendButton: press
+activate SendButton
+SendButton -> login.js: onSubmit
+activate login.js
+login.js ->TextInput: getValue
+activate TextInput
+TextInput -->login.js: "Ignacio"
+deactivate TextInput
+login.js ->login.js: createUser
+activate login.js
+login.js -->login.js:
+deactivate login.js
+login.js ->(2) UserController: POST: newUser
+login.js -->SendButton:
+deactivate SendButton
+
+activate UserController
+UserController -> Provider: getModels
+Provider -->UserController: models
+UserController ->Provider: createModel
+Provider -->UserController: model
+
+deactivate UserController
+
+UserController -->login.js: user
+note right of login.js: Change screen to\nchat groups
+deactivate login.js
+
