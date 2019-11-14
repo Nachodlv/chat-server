@@ -222,7 +222,7 @@ function appendUserMessage(msg: Message, isAuthor: boolean) {
                 .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
             return node;
         }));
-    window.scrollTo(0, document.body.scrollHeight);
+    scrollToBottom()
 }
 
 /*
@@ -249,7 +249,16 @@ function appendFileMessage(msg: FileMessage, isAuthor: boolean) {
             addFileHTML(msg, node);
             return node;
         }));
-    window.scrollTo(0, document.body.scrollHeight);
+    scrollToBottom();
+}
+
+/*
+* Scrolls the messages div to the bottom, to show the most recent messages
+* */
+function scrollToBottom(){
+    const container = $('#messages-container');
+    const height = container[0].scrollHeight;
+    container.scrollTop(height);
 }
 
 /*
