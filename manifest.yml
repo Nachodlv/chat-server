@@ -1,6 +1,6 @@
 ---
 applications:
-- name: clever-kepler
+- name: gracious-mcnulty
   memory: 512M
   instances: 1
 
