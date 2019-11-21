@@ -6,9 +6,10 @@
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
     "express": "^4.15.2",
-    "socket.io": "^1.7.4",
     "flow-bin": "^0.109.0",
-    "flow-remove-types": "^2.110.1"
+    "flow-remove-types": "^2.110.1",
+    "request": "^2.88.0",
+    "socket.io": "^1.7.4"
   },
   "scripts": {
     "start": "rm -R -f lib && flow-remove-types ./ -d ./lib/ -p --all -x .html,.css,.js --quiet; node lib/index.js",

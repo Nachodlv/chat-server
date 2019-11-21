@@ -7,11 +7,12 @@ class ChatWebSocket {
     message: Message;
     chatRoomProvider: Provider;
 
-    constructor(io, Message: Message, chatRoomProvider: Provider) {
+    constructor(io, Message: Message, chatRoomProvider: Provider, requestLib) {
         this.Message = Message;
         this.namespace = io.of('/chat-room');
         this.assignCallbacks();
         this.chatRoomProvider = chatRoomProvider;
+        this.request = requestLib;
     }
 
     /*
@@ -43,14 +44,21 @@ class ChatWebSocket {
         socket.on('chat message', (msg) => {
             const message: Message | FileMessage = JSON.parse(msg);
             const room: ChatRoom = this.chatRoomProvider.getModel(message.roomId);
-            room.messages.push(message);
-            if (message.messageType === 'UserMessage') {
-                socket.to(message.roomId).emit('chat message', msg);
-                console.log(message.userName + "(" + message.roomId +"): " + message.text)
-            } else {
-                socket.to(message.roomId).emit('chat file message', msg);
-                console.log(message.userName + "(" + message.roomId +"): " + message.fileName)
-            }
+
+            this.request({url: 'https://eu-de.functions.cloud.ibm.com/api/v1/web/Gianluca.Scolaro%40Student.Reutlingen-University.DE_dev/hrt-demo/identify-and-translate', qs:{text: message.text}}, (error, response, body) => {
+                if (!error && response.statusCode === 200) {
+                    const translations = JSON.parse(response.body).translations;
+                    message.text = translations !== undefined ? translations : message.text;
+                }
+                room.messages.push(message);
+                if (message.messageType === 'UserMessage') {
+                    socket.to(message.roomId).emit('chat message', msg);
+                    console.log(message.userName + "(" + message.roomId +"): " + message.text)
+                } else {
+                    socket.to(message.roomId).emit('chat file message', msg);
+                    console.log(message.userName + "(" + message.roomId +"): " + message.fileName)
+                }
+            });
         });
     }
 

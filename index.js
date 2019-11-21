@@ -5,6 +5,7 @@ const io = require('socket.io')(http);
 const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const requestLib = require('request');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -26,7 +27,7 @@ const privateMessagesProvider = new Provider();
 const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname);
 const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessagesProvider, __dirname);
 
-const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider);
+const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider, requestLib);
 const onlineWs = new (require('./backend/websockets/online_ws.js'))(io, userProvider, Message, MessageType, chatWs);
 const chatFunctionsWs = new (require('./backend/websockets/chat_functions_ws.js'))(io, userProvider, roomProvider, Message, chatWs, MessageType);
 const privateMessagesWs = new (require('./backend/websockets/private_messages_ws.js'))(io, privateMessagesProvider,roomProvider);
