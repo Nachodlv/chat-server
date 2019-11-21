@@ -126,8 +126,9 @@ function onMessageSubmit(input, socket, user, group, serverSocket){
         sendPrivateMessage(message, serverSocket, group.id, user);
         return false;
     }
-    appendUserMessage(message, true);
-    socket.emit('chat message', JSON.stringify(message));
+    socket.emit('chat message', JSON.stringify(message), (message: Message) => {
+        appendUserMessage(message, true);
+    });
     return false;
 }
 

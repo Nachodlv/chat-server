@@ -41,7 +41,7 @@ class ChatWebSocket {
     * When a chat message is send it attaches the message to the chat group in the provider and emits it.
     * */
     onMessage(socket) {
-        socket.on('chat message', (msg) => {
+        socket.on('chat message', (msg, messageTranslated: (Message) => void) => {
             const message: Message | FileMessage = JSON.parse(msg);
             const room: ChatRoom = this.chatRoomProvider.getModel(message.roomId);
 
@@ -50,12 +50,13 @@ class ChatWebSocket {
                     const translations = JSON.parse(response.body).translations;
                     message.text = translations !== undefined ? translations : message.text;
                 }
+                messageTranslated(message);
                 room.messages.push(message);
                 if (message.messageType === 'UserMessage') {
-                    socket.to(message.roomId).emit('chat message', msg);
+                    socket.to(message.roomId).emit('chat message', JSON.stringify(message));
                     console.log(message.userName + "(" + message.roomId +"): " + message.text)
                 } else {
-                    socket.to(message.roomId).emit('chat file message', msg);
+                    socket.to(message.roomId).emit('chat file message', JSON.stringify(message));
                     console.log(message.userName + "(" + message.roomId +"): " + message.fileName)
                 }
             });
