@@ -3,8 +3,8 @@
 * */
 class UserController {
     dirname: string;
-    userProvider: Provider;
-    constructor(app, userProvider: Provider, dirname: string) {
+    userProvider: UserProvider;
+    constructor(app, userProvider: UserProvider, dirname: string) {
         this.app = app;
         this.userProvider = userProvider;
         this.dirname = dirname;
@@ -30,15 +30,23 @@ class UserController {
     newUser() {
         this.app.post('/login', (req, res) => {
             const user = req.body;
-            const result = this.userProvider.models.find((model) => model.name === user.name);
-            if(result) {
-                res.status(409);
-                res.send('Nickname already in use');
-                return;
-            }
-            const newUser = this.userProvider.createModel(user);
-            res.status(200);
-            res.send(JSON.stringify(newUser));
+            this.userProvider.getUser(user.name, (oldUser, _) => {
+                if(oldUser !== undefined) {
+                    res.status(409);
+                    res.send('Nickname already in use');
+                    return;
+                }
+                this.userProvider.createUser(user, (newUser, error) => {
+                    if(newUser !== undefined) {
+                        res.status(200);
+                        res.send(JSON.stringify(newUser));
+                    } else {
+                        res.status(500);
+                        res.send(error);
+                    }
+                });
+            });
+
         });
     }
 

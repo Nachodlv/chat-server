@@ -30,13 +30,14 @@ io.set('transports', ['websocket',
     'polling']);
 
 const Provider = require('./backend/providers/provider.js');
+const UserProvider = require('./backend/providers/user_provider.js');
 const User = require('./backend/models/user.js');
 const Message = require('./backend/models/message.js');
 const MessageType = require('./backend/models/message_type.js');
 const ChatRoom = require('./backend/models/chat_room.js');
 
 // INITIALIZATIONS
-const userProvider = new Provider();
+const userProvider = new UserProvider();
 const roomProvider = new Provider();
 const privateMessagesProvider = new Provider();
 

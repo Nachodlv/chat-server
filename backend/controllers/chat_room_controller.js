@@ -4,10 +4,10 @@
 class ChatRoomController {
     dirname: string;
     chatRoomProvider: Provider;
-    userProvider: Provider;
+    userProvider: UserProvider;
     privateMessageProvider: Provider;
 
-    constructor(app, chatRoomProvider: Provider, userProvider: Provider, privateMessagesProvider: Provider, dirname: string) {
+    constructor(app, chatRoomProvider: Provider, userProvider: UserProvider, privateMessagesProvider: Provider, dirname: string) {
         this.app = app;
         this.chatRoomProvider = chatRoomProvider;
         this.userProvider = userProvider;
@@ -78,17 +78,25 @@ class ChatRoomController {
     newChatRoom() {
         this.app.post('/chat-room', (req, res) => {
             const room: ChatRoom = req.body;
-            const user: User = this.userProvider.getModel(room.ownerId);
-            if (!user) {
-                res.status(404);
-                res.send('No user was found with id: ' + room.ownerId);
-                return;
-            }
-            room.users.push(user);
-            const newRoom = this.chatRoomProvider.createModel(room);
-            user.chatRooms.push(newRoom.id);
-            res.status(200);
-            res.send(JSON.stringify(newRoom));
+           this.userProvider.getUserById(room.ownerId, (user, _) => {
+               if (user === undefined) {
+                   res.status(404);
+                   res.send('No user was found with id: ' + room.ownerId);
+                   return;
+               }
+               this.userProvider.createUser(user, (user, _) => {
+                   if(user === undefined) {
+                       res.status(500);
+                       res.send('Error while creating the user');
+                       return;
+                   }
+                   room.users.push(user);
+                   const newRoom = this.chatRoomProvider.createModel(room);
+                   user.chatRooms.push(newRoom.id);
+                   res.status(200);
+                   res.send(JSON.stringify(newRoom));
+               });
+           });
         });
     }
 

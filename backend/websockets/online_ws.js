@@ -3,11 +3,11 @@
 * */
 
 module.exports = class OnlineWebSocket {
-    userProvider: Provider;
+    userProvider: UserProvider;
     Message: Message;
     MessageType: MessageType;
 
-    constructor(io, userProvider: Provider, Message: Message, MessageType: MessageType, chatWs: ChatWebSocket) {
+    constructor(io, userProvider: UserProvider, Message: Message, MessageType: MessageType, chatWs: ChatWebSocket) {
         this.userProvider = userProvider;
         this.Message = Message;
         this.MessageType = MessageType;
@@ -24,11 +24,13 @@ module.exports = class OnlineWebSocket {
     assignCallbacks() {
         this.namespace.on('connection', (socket) => {
             const userId: number = Number(socket.handshake.query['userId']);
-            const user: User = this.userProvider.getModel(userId);
-            socket.join(String(userId));
-            if (!user) return;
-            this.onConnection(user);
-            socket.on('disconnect', () => this.onDisconnect(user));
+            this.userProvider.getUserById(userId, (user, _) => {
+                socket.join(String(userId));
+                if (user === undefined) return;
+                this.onConnection(user);
+                socket.on('disconnect', () => this.onDisconnect(user));
+            });
+
         });
     }
 
@@ -42,6 +44,7 @@ module.exports = class OnlineWebSocket {
             console.log(user.name + ' is now online');
         }
         user.online = true;
+        this.userProvider.updateUser(user);
     }
 
     /*
@@ -53,7 +56,7 @@ module.exports = class OnlineWebSocket {
             console.log(user.name + ' is now offline');
         }
         user.online = false;
-
+        this.userProvider.updateUser(user);
     }
 
     /*

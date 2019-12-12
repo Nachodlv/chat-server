@@ -2,13 +2,13 @@
 * Web socket used to invite or kick users from groups.
 * */
 module.exports = class ChatFunctionWebSocket {
-    userProvider: Provider;
+    userProvider: UserProvider;
     roomProvider: Provider;
     Message: Message;
     MessageType: MessageType;
     chatWs: ChatWebSocket;
 
-    constructor(io, userProvider: Provider, roomProvider: Provider, Message: Message, chatWs: ChatWebSocket, MessageType: MessageType) {
+    constructor(io, userProvider: UserProvider, roomProvider: Provider, Message: Message, chatWs: ChatWebSocket, MessageType: MessageType) {
         this.userProvider = userProvider;
         this.roomProvider = roomProvider;
         this.chatWs = chatWs;
@@ -42,22 +42,24 @@ module.exports = class ChatFunctionWebSocket {
                 fn(undefined, true, 'An error occurred');
                 return;
             }
-            const user: User = this.userProvider.models.find((model) => model.name === data.nickname);
-            if (!user) {
-                fn(user, true, 'The user does not exists');
-                return;
-            }
-            if (room.users.find(u => u.id === user.id)) {
-                fn(user, true, 'The user is already in the chat room');
-                return;
-            }
-            room.users.push(user);
-            user.chatRooms.push(room.id);
-            fn(user, false);
-            socket.to(user.id).emit('invite', room);
-            this.chatWs.sendMessageToChat(room.id, new this.Message(`${user.name} has joined the group!`,
-                user.name, this.MessageType.ServerMessage, room.id));
-            console.log(`${data.nickname} was invited to ${room.name}`)
+            this.userProvider.getUser(data.nickname, (user, _) => {
+                if (user === undefined) {
+                    fn(user, true, 'The user does not exists');
+                    return;
+                }
+                if (room.users.find(u => u.id === user.id)) {
+                    fn(user, true, 'The user is already in the chat room');
+                    return;
+                }
+                room.users.push(user);
+                user.chatRooms.push(room.id);
+                fn(user, false);
+                socket.to(user.id).emit('invite', room);
+                this.chatWs.sendMessageToChat(room.id, new this.Message(`${user.name} has joined the group!`,
+                    user.name, this.MessageType.ServerMessage, room.id));
+                console.log(`${data.nickname} was invited to ${room.name}`)
+            });
+
         })
     }
 
@@ -66,12 +68,13 @@ module.exports = class ChatFunctionWebSocket {
     * */
     onChatRoomKick(socket) {
         socket.on('kick', (roomId: number, userId: number) => {
-            const user: User = this.userProvider.getModel(userId);
-            const room: ChatRoom = this.roomProvider.getModel(roomId);
-            if (!user || !room) return;
-            user.chatRooms = user.chatRooms.filter(id => id !== roomId);
-            room.users = room.users.filter(user => user.id !== userId);
-            socket.to(user.id).emit('kick', roomId);
+            this.userProvider.getUserById(userId, (user, _) => {
+                const room: ChatRoom = this.roomProvider.getModel(roomId);
+                if (user === undefined || !room) return;
+                user.chatRooms = user.chatRooms.filter(id => id !== roomId);
+                room.users = room.users.filter(user => user.id !== userId);
+                socket.to(user.id).emit('kick', roomId);
+            });
         });
     }
 
