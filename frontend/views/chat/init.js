@@ -26,8 +26,8 @@ $(function () {
 * It initializes the group list, and then the group chat and invite user input
 * */
 function init(user: User) {
-    const serverSocket = io('/', {query: "userId=" + user.id});
-    const chatSocket = io('/chat-room');
+    const serverSocket = io('/', {query: "userId=" + user.id, secure: true});
+    const chatSocket = io('/chat-room', {secure: true});
     user.chatRooms.forEach(roomId => chatSocket.emit('join', roomId));
     groupListInit(chatSocket, serverSocket, user, (groups) => {
         chatInit(chatSocket, user, groups, serverSocket);
