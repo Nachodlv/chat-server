@@ -84,18 +84,19 @@ class ChatRoomController {
                    res.send('No user was found with id: ' + room.ownerId);
                    return;
                }
-               this.userProvider.createUser(user, (user, _) => {
-                   if(user === undefined) {
+               room.users.push(user);
+               const newRoom = this.chatRoomProvider.createModel(room);
+               user.chatRooms.push(newRoom.id);
+               this.userProvider.updateUser(user, (updatedUser, error) => {
+                   if(!error && updatedUser !== undefined) {
+                       res.status(200);
+                       res.send(JSON.stringify(newRoom));
+                   } else {
                        res.status(500);
-                       res.send('Error while creating the user');
-                       return;
+                       res.send("Error while updating the user");
                    }
-                   room.users.push(user);
-                   const newRoom = this.chatRoomProvider.createModel(room);
-                   user.chatRooms.push(newRoom.id);
-                   res.status(200);
-                   res.send(JSON.stringify(newRoom));
                });
+
            });
         });
     }

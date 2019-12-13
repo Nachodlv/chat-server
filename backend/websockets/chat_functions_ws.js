@@ -39,7 +39,7 @@ module.exports = class ChatFunctionWebSocket {
         socket.on('invite', (data, fn: (user: User, containsError: boolean, errorMessage: string) => void) => {
             const room: ChatRoom = this.roomProvider.getModel(data.roomId);
             if (!room) {
-                fn(undefined, true, 'An error occurred');
+                fn(undefined, true, 'The room does not exist');
                 return;
             }
             this.userProvider.getUser(data.nickname, (user, _) => {
@@ -53,11 +53,14 @@ module.exports = class ChatFunctionWebSocket {
                 }
                 room.users.push(user);
                 user.chatRooms.push(room.id);
-                fn(user, false);
-                socket.to(user.id).emit('invite', room);
-                this.chatWs.sendMessageToChat(room.id, new this.Message(`${user.name} has joined the group!`,
-                    user.name, this.MessageType.ServerMessage, room.id));
-                console.log(`${data.nickname} was invited to ${room.name}`)
+                this.userProvider.updateUser(user, (userUpdated, _) => {
+                    fn(userUpdated, false);
+                    socket.to(userUpdated.id).emit('invite', room);
+                    this.chatWs.sendMessageToChat(room.id, new this.Message(`${userUpdated.name} has joined the group!`,
+                        userUpdated.name, this.MessageType.ServerMessage, room.id));
+                    console.log(`${data.nickname} was invited to ${room.name}`)
+                });
+
             });
 
         })
@@ -72,8 +75,14 @@ module.exports = class ChatFunctionWebSocket {
                 const room: ChatRoom = this.roomProvider.getModel(roomId);
                 if (user === undefined || !room) return;
                 user.chatRooms = user.chatRooms.filter(id => id !== roomId);
-                room.users = room.users.filter(user => user.id !== userId);
-                socket.to(user.id).emit('kick', roomId);
+                this.userProvider.updateUser(user, (updatedUser, _) => {
+                    if (updatedUser === undefined) {
+                        console.log("Error while trying to kick an user");
+                        return;
+                    }
+                    room.users = room.users.filter(user => updatedUser.id !== userId);
+                    socket.to(user.id).emit('kick', roomId);
+                });
             });
         });
     }
@@ -88,7 +97,13 @@ module.exports = class ChatFunctionWebSocket {
             this.roomProvider.deleteModel(roomId);
             room.users.forEach(user => {
                 user.chatRooms = user.chatRooms.filter(id => id !== roomId);
-                socket.to(user.id).emit('delete', roomId);
+                this.userProvider.updateUser(user, (userUpdated, error) => {
+                    if (userUpdated === null) {
+                        console.log(error);
+                        return;
+                    }
+                    socket.to(userUpdated.id).emit('delete', roomId);
+                });
             });
         })
     }

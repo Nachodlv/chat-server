@@ -57,14 +57,15 @@ class UserController {
     getUser() {
         this.app.get('/user/:userId*', (req, res) => {
             const userId = Number(req.params['userId']);
-            const user = this.userProvider.getModel(userId);
-            if(user) {
-                res.status(200);
-                res.send(JSON.stringify(user));
-            } else {
-                res.status(404);
-                res.send('No user found with id: ' + userId);
-            }
+            this.userProvider.getUserById(userId, (user, _) => {
+                if(user) {
+                    res.status(200);
+                    res.send(JSON.stringify(user));
+                } else {
+                    res.status(404);
+                    res.send('No user found with id: ' + userId);
+                }
+            });
         });
     }
 

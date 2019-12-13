@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const https = require('https');
@@ -6,6 +8,7 @@ const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const requestLib = require('request');
+const connection = require('./database');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -37,7 +40,7 @@ const MessageType = require('./backend/models/message_type.js');
 const ChatRoom = require('./backend/models/chat_room.js');
 
 // INITIALIZATIONS
-const userProvider = new UserProvider();
+const userProvider = new UserProvider(connection, User);
 const roomProvider = new Provider();
 const privateMessagesProvider = new Provider();
 

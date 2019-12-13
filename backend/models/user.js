@@ -8,11 +8,11 @@ class User {
     id: number;
     chatRooms: number[];
 
-    constructor(name: string) {
-        this.name = name;
-        this.online = true;
-        this.id = 0;
-        this.chatRooms = [];
+    constructor(data: any) {
+        this.name = data.name;
+        this.online = data.online;
+        this.id = data.id;
+        this.chatRooms = data.chatRooms === undefined ? [] : data.chatRooms;
     }
 }
 

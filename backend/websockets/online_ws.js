@@ -44,7 +44,7 @@ module.exports = class OnlineWebSocket {
             console.log(user.name + ' is now online');
         }
         user.online = true;
-        this.userProvider.updateUser(user);
+        this.userProvider.updateUser(user, () => {});
     }
 
     /*
@@ -56,7 +56,7 @@ module.exports = class OnlineWebSocket {
             console.log(user.name + ' is now offline');
         }
         user.online = false;
-        this.userProvider.updateUser(user);
+        this.userProvider.updateUser(user, () => {});
     }
 
     /*
