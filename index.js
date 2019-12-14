@@ -7,12 +7,13 @@ const fs = require('fs');
 const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const skipper = require('skipper');
 const requestLib = require('request');
 const connection = require('./database');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
-
+app.use(skipper());
 app.use(express.static(__dirname + '/frontend/'));
 app.use(express.static(__dirname + '/frontend/views/'));
 

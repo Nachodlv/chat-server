@@ -1,3 +1,15 @@
 #main-container {
   height: 100%;
 }
+
+#main-container .card {
+  width: 350px;
+}
+
+#main-container .invalid-tooltip {
+  position: relative;
+}
+
+#main-container .go-btn, #main-container .register-btn{
+  width: 100px;
+}

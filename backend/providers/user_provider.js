@@ -58,6 +58,8 @@ class UserProvider {
         return {
             id: user.id,
             name: user.name,
+            password: user.password,
+            imgPath: user.imgPath,
             online: user.online
         }
     }

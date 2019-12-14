@@ -13,7 +13,7 @@ If the nickname is already in use by another user, an error will appear.
     <title>Title</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="login.css">
+    <link rel="stylesheet" type="text/css" href="../register/register.css">
 </head>
 <body>
 
@@ -36,12 +36,24 @@ If the nickname is already in use by another user, an error will appear.
                             Password should be at least 6 characters long
                         </div>
                     </div>
+                    <div class="form-group mb-2">
+                        <input type="file" id="file-input" name="img[]" class="file" accept="image/*" required>
+                        <div class="input-group my-3">
+                            <input type="text" class="form-control" disabled placeholder="Upload profile image" id="file-text">
+                            <div class="input-group-append">
+                                <button type="button" id="image-browse" class="browse btn btn-primary">Browse...</button>
+                            </div>
+                        </div>
+                        <div class="preview-container">
+                            <img src="https://placehold.it/160x160" id="preview" class="img-thumbnail">
+                        </div>
+                    </div>
                     <div class="invalid-tooltip" id="error">
                         An error has occurred. Please try again later.
                     </div>
                     <div class="buttons-container justify-content-between mt-4 no-gutters row">
-                        <button type="button" class="btn btn-secondary register-btn mb-2">Register</button>
-                        <button type="submit" class="btn btn-primary go-btn mb-2">Go!</button>
+                        <button type="button" class="btn btn-secondary login-btn mb-2">Login</button>
+                        <button type="submit" class="btn btn-primary go-btn mb-2">Register</button>
                     </div>
                 </form>
             </div>
@@ -61,7 +73,7 @@ If the nickname is already in use by another user, an error will appear.
         crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 <script src="../../models/user.js" type="module"></script>
-<script src="login.js" type="module"></script>
+<script src="../register/register.js" type="module"></script>
 
 </body>
 </html>

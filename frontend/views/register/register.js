@@ -14,12 +14,13 @@ import {AuthService} from "../../services/auth-service.js";
 $(function () {
     AuthService.isAuthorized(() => {
         window.location.href = '/';
-    }, initLogin)
+    }, initRegister)
 });
 
-function initLogin() {
+function initRegister() {
     onSubmit();
-    onRegisterClick();
+    onImageSelect();
+    onLoginClick();
 }
 
 /*
@@ -38,14 +39,53 @@ function onSubmit(): void {
             showError('Password should be at least 6 characters long');
             return false;
         }
-        loginUser(nickname, pass);
+        const file = $('input[type="file"]')[0].files[0];
+        saveImage(file, nickname, pass);
         return false;
     });
 }
 
-function onRegisterClick() {
-    $('.register-btn').on("click", () => {
-        window.location.href = '/register';
+function onImageSelect() {
+    $('#image-browse').on("click", () => {
+        $('#file-input').click();
+    });
+    $('input[type="file"]').change((e) => {
+        const file = e.target.files[0];
+        $("#file-text").val(file.name);
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // get loaded data and render thumbnail.
+            document.getElementById("preview").src = e.target.result;
+        };
+        // read the image file as a data URL.
+        reader.readAsDataURL(file);
+    });
+}
+
+function onLoginClick() {
+    $('.login-btn').on("click", () => {
+        window.location.href = '/login';
+    });
+}
+
+function saveImage(file, nickname, pass): void {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    $.ajax({
+        type: "POST",
+        url: "/save-image",
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: (msg) => {
+            const path = msg.files[0].fd;
+            registerUser(nickname, pass, path)
+        },
+        error: (xhr) => {
+            showError('An error has occurred. Please try again later.');
+        }
     });
 }
 
@@ -54,21 +94,22 @@ function onRegisterClick() {
 * function.
 * If the post fails it will show an error in the html specifying the error.
 * */
-function loginUser(nickname, pass): void {
+function registerUser(nickname, pass, path): void {
+    // TODO encrypt password with sha256
     $.ajax({
         type: "POST",
         beforeSend: function(request) {
             request.setRequestHeader("Content-Type", "application/json");
         },
-        url: "/login",
-        data: JSON.stringify(new User(nickname, pass)),
+        url: "/register",
+        data: JSON.stringify(new User(nickname, pass, path)),
         processData: false,
         success: function(msg) {
             CookieService.setCookie('user', msg, 1);
             window.location.href = '/';
         },
         error: function (xhr) {
-            if(xhr.status === 404 || xhr.status === 403) showError('Incorrect username or password.');
+            if(xhr.status === 409) showError('The username is already in use.');
             else showError('An error has occurred. Please try again later.');
         }
     });

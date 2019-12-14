@@ -1,0 +1,20 @@
+#main-container {
+  height: 100%;
+}
+
+#main-container .card {
+  width: 350px;
+}
+
+#main-container .invalid-tooltip {
+    position: relative;
+}
+
+#main-container .go-btn, #main-container .login-btn{
+   width: 100px;
+ }
+
+#main-container .file {
+  visibility: hidden;
+  position: absolute;
+}
