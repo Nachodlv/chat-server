@@ -4,10 +4,12 @@
 module.exports = class PrivateMessagesWebSocket {
     privateMessageProvider: Provider;
     roomProvider: Provider;
+    translatorService: TranslatorService;
 
-    constructor(io, privateMessageProvider: Provider, roomProvider: Provider) {
+    constructor(io, privateMessageProvider: Provider, roomProvider: Provider, translatorService: TranslatorService) {
         this.privateMessageProvider = privateMessageProvider;
         this.roomProvider = roomProvider;
+        this.translatorService = translatorService;
         this.namespace = io.of('/');
         this.assignCallbacks();
     }
@@ -25,7 +27,7 @@ module.exports = class PrivateMessagesWebSocket {
     * When a private message is received it sends the message to the corresponding users.
     * */
     onWhisper(socket) {
-        socket.on('private message', (message: PrivateMessage | PrivateFileMessage, onError: (message: string) => void) => {
+        socket.on('private message', (message: PrivateMessage | PrivateFileMessage, callback: (message: Message, errorMessage: string) => void) => {
             this.privateMessageProvider.createModel(message);
             const room: ChatRoom = this.roomProvider.getModel(message.roomId);
             const users: User[] = room.users;
@@ -38,14 +40,17 @@ module.exports = class PrivateMessagesWebSocket {
                 successful = false;
             });
             if(!successful) {
-                onError(`The user ${errorOnUser} is not present in the room`);
+                callback(undefined, `The user ${errorOnUser} is not present in the room`);
                 return
             }
-            if (message.messageType === 'PrivateMultimedia')
-                ids.forEach(id => this.namespace.to(id).emit('private file message', message));
-            else ids.forEach(id => this.namespace.to(id).emit('private message', message));
-
-            console.log(`${message.nicknames}(${message.userName}): ${message.text}`);
+            this.translatorService.translatate(message.text, (translatedMessage) => {
+                message.text = translatedMessage;
+                callback(message, undefined);
+                if (message.messageType === 'PrivateMultimedia')
+                    ids.forEach(id => this.namespace.to(id).emit('private file message', message));
+                else ids.forEach(id => this.namespace.to(id).emit('private message', message));
+                console.log(`${message.nicknames}(${message.userName}): ${message.text}`);
+            });
         });
     }
 };
