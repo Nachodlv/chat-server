@@ -154,8 +154,9 @@ function onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket
         if (msg.text[0] === '@') {
             sendPrivateFileMessage(msg, serverSocket, group.id, user);
         } else {
-            appendFileMessage(msg, true);
-            socket.emit('chat message', JSON.stringify(msg));
+            socket.emit('chat message', JSON.stringify(msg), (message) => {
+                appendFileMessage(message, true);
+            });
         }
     };
     return false;
@@ -175,7 +176,7 @@ function sendPrivateMessage(message: Message, serverSocket, groupId: number, use
     const privateMessage: PrivateMessage = new PrivateMessage(res.names, res.text, message.userName,
         MessageType.PrivateMessage, message.timeStamp, message.roomId);
     serverSocket.emit('private message', privateMessage, (message: Message, error: string) => {
-        if(privateMessage !== undefined) appendPrivateMessage(privateMessage, true);
+        if(privateMessage !== undefined) appendPrivateMessage(message, true);
         else if(error !== undefined) onError(error);
     })
 }
@@ -194,7 +195,7 @@ function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: num
     const privateMessage: PrivateFileMessage = new PrivateFileMessage(res.names, message.fileName, message.fileType, message.fileSize,
         message.data, res.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
     serverSocket.emit('private message', privateMessage, (message: Message, error: string) => {
-        if(message !== undefined) appendPrivateFileMessage(privateMessage, true);
+        if(message !== undefined) appendPrivateFileMessage(message, true);
         else if(error !== undefined) onError(error);
     })
 }
