@@ -14,6 +14,10 @@ export class CookieService {
         window.document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     }
 
+    static removeCookie(cname: string) {
+        window.document.cookie = cname + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
+    }
+
     /*
     * Returns the value of a cookie with the name 'cname'.
     * Returns and empty string if cookie does not exist.
