@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const skipper = require('skipper');
 const requestLib = require('request');
 const connection = require('./database');
+const bCrypt = require('bcrypt');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -46,8 +47,9 @@ const roomProvider = new Provider();
 const privateMessagesProvider = new Provider();
 
 const translatorService = new (require('./backend/services/translator_service.js'))(requestLib);
+const encryptionService = new (require('./backend/services/encryption_service.js'))(bCrypt);
 
-const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname);
+const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname, encryptionService);
 const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessagesProvider, __dirname);
 
 const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider, translatorService);
