@@ -70,6 +70,7 @@ function onLoginClick() {
 }
 
 function saveImage(file, nickname, pass): void {
+    // TODO see if we can save images in ibm or google cloud
     const formData = new FormData();
     formData.append('avatar', file);
     $.ajax({
@@ -109,7 +110,9 @@ function registerUser(nickname, pass, path): void {
             window.location.href = '/';
         },
         error: function (xhr) {
+            debugger;
             if(xhr.status === 409) showError('The username is already in use.');
+            if(xhr.status === 403) showError(xhr.responseText);
             else showError('An error has occurred. Please try again later.');
         }
     });

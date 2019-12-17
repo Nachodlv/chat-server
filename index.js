@@ -45,7 +45,7 @@ const userProvider = new UserProvider(connection, User);
 const roomProvider = new Provider();
 const privateMessagesProvider = new Provider();
 
-const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname);
+const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname, requestLib);
 const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessagesProvider, __dirname);
 
 const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider, requestLib);
