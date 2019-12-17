@@ -96,7 +96,6 @@ function saveImage(file, nickname, pass): void {
 * If the post fails it will show an error in the html specifying the error.
 * */
 function registerUser(nickname, pass, path): void {
-    // TODO encrypt password with sha256
     $.ajax({
         type: "POST",
         beforeSend: function(request) {
@@ -110,7 +109,6 @@ function registerUser(nickname, pass, path): void {
             window.location.href = '/';
         },
         error: function (xhr) {
-            debugger;
             if(xhr.status === 409) showError('The username is already in use.');
             if(xhr.status === 403) showError(xhr.responseText);
             else showError('An error has occurred. Please try again later.');

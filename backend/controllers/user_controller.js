@@ -89,14 +89,14 @@ class UserController {
         const id = path.substring(path.lastIndexOf('/') + 1);
         this.getUserImage(path, id);
         this.request({url: 'https://eu-de.functions.cloud.ibm.com/api/v1/web/7e9d533d-cf28-46d0-8942-ce49cc1cfd0e/visual-recog-actions/clasify-image', qs:{url: origin + '/image/' + id}}, (error, response, body) => {
-            callback(!error && response.statusCode === 200 && response.length, error)
+            callback(!error && response.statusCode === 200 && response.length, response.statusCode)
         });
     }
 
     registerUser() {
         this.app.post('/register', (req, res) => {
             const user = req.body;
-            this.validateImage(user.imgPath, req.headers.origin, (isValid, err) => {
+            this.validateImage(user.imgPath, req.headers.origin, (isValid, status) => {
                 if (isValid) {
                     this.encryptionService.hashPassword(user.password, (hashedPassword) => {
                         if(hashedPassword === undefined) {
@@ -123,12 +123,12 @@ class UserController {
                         });
                     });
                 } else {
-                    if (!err) {
+                    if (status === 200) {
                         res.status(403);
                         res.send('Profile picture should include a person');
                     } else {
                         res.status(500);
-                        res.send(err);
+                        res.send('Internal Server Error');
                     }
                 }
             });
