@@ -10,7 +10,6 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const skipper = require('skipper');
 const requestLib = require('request');
-const connection = require('./database');
 const bCrypt = require('bcrypt');
 
 const local: boolean = process.argv[2] === 'local';
@@ -28,10 +27,11 @@ if (!local) {
 
     app.use(requireHTTPS);
 
-    const server = http.Server(app).listen(port, function () {
+    const server = http.Server(app);
+    server.listen(port, function () {
         console.log("listening on: " + port);
     });
-    io = require('socket.io').listen(http);
+    io = require('socket.io').listen(server);
 
 } else {
     const server = https.createServer({
@@ -74,7 +74,8 @@ const MessageType = require('./backend/models/message_type.js');
 const ChatRoom = require('./backend/models/chat_room.js');
 
 // INITIALIZATIONS
-const userProvider = new UserProvider(connection, User);
+const dataBaseConnection = new (require('./database.js'))(requestLib);
+const userProvider = new UserProvider(dataBaseConnection, User, requestLib);
 const roomProvider = new Provider();
 const privateMessagesProvider = new Provider();
 
