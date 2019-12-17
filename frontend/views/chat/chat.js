@@ -143,7 +143,7 @@ function onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket
     const fileReader = new FileReader();
 
     fileReader.readAsDataURL(file);
-    fileReader.onload = (evt) => {
+    fileReader.onload = (_) => {
         const arrayBuffer = fileReader.result;
         const msg = new FileMessage(file.name, file.type, file.size, arrayBuffer, input.val(), user.name,
             MessageType.Multimedia, new Date(), group.id);
@@ -154,8 +154,9 @@ function onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket
         if (msg.text[0] === '@') {
             sendPrivateFileMessage(msg, serverSocket, group.id, user);
         } else {
-            appendFileMessage(msg, true);
-            socket.emit('chat message', JSON.stringify(msg));
+            socket.emit('chat message', JSON.stringify(msg), (message) => {
+                appendFileMessage(message, true);
+            });
         }
     };
     return false;
@@ -174,9 +175,9 @@ function sendPrivateMessage(message: Message, serverSocket, groupId: number, use
 
     const privateMessage: PrivateMessage = new PrivateMessage(res.names, res.text, message.userName,
         MessageType.PrivateMessage, message.timeStamp, message.roomId);
-    appendPrivateMessage(privateMessage, true);
-    serverSocket.emit('private message', privateMessage, (error: string) => {
-        onError(error);
+    serverSocket.emit('private message', privateMessage, (message: Message, error: string) => {
+        if(privateMessage !== undefined) appendPrivateMessage(message, true);
+        else if(error !== undefined) onError(error);
     })
 }
 
@@ -193,9 +194,9 @@ function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: num
 
     const privateMessage: PrivateFileMessage = new PrivateFileMessage(res.names, message.fileName, message.fileType, message.fileSize,
         message.data, res.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
-    appendPrivateFileMessage(privateMessage, true);
-    serverSocket.emit('private message', privateMessage, (error: string) => {
-        onError(error);
+    serverSocket.emit('private message', privateMessage, (message: Message, error: string) => {
+        if(message !== undefined) appendPrivateFileMessage(message, true);
+        else if(error !== undefined) onError(error);
     })
 }
 

@@ -176,3 +176,7 @@ html, body, .main-container {
     font-size: 31px!important;
 }
 
+#logout-button-container {
+    margin-left: 15px;
+}
+

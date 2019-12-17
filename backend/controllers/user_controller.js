@@ -4,11 +4,13 @@
 class UserController {
     dirname: string;
     userProvider: UserProvider;
-    constructor(app, userProvider: UserProvider, dirname: string, requestLib) {
+    encryptionService: EncryptionService;
+    constructor(app, userProvider: UserProvider, dirname: string, requestLib, encryptionService) {
         this.app = app;
         this.userProvider = userProvider;
         this.dirname = dirname;
         this.request = requestLib;
+        this.encryptionService = encryptionService;
         this.loginView();
         this.registerView();
         this.loginUser();
@@ -50,13 +52,16 @@ class UserController {
                     res.send('User not found');
                     return;
                 }
-                if(oldUser.password !== user.password) {
-                    res.status(403);
-                    res.send('Incorrect password');
-                    return;
-                }
-                res.status(200);
-                res.send(JSON.stringify(oldUser));
+                this.encryptionService.comparePassword(user.password, oldUser.password, (matches) => {
+                    if(matches) {
+                        res.status(200);
+                        res.send(JSON.stringify(oldUser));
+                    } else {
+                        res.status(403);
+                        res.send('Incorrect password');
+                    }
+                });
+
             });
 
         });
@@ -93,20 +98,28 @@ class UserController {
             const user = req.body;
             this.validateImage(user.imgPath, req.headers.origin, (isValid, err) => {
                 if (isValid) {
-                    this.userProvider.getUser(user.name, (oldUser, _) => {
-                        if(oldUser !== undefined) {
-                            res.status(409);
-                            res.send('Nickname already in use');
+                    this.encryptionService.hashPassword(user.password, (hashedPassword) => {
+                        if(hashedPassword === undefined) {
+                            res.status(500);
+                            res.send('Error hashing the password');
                             return;
                         }
-                        this.userProvider.createUser(user, (newUser, error) => {
-                            if(newUser !== undefined) {
-                                res.status(200);
-                                res.send(JSON.stringify(newUser));
-                            } else {
-                                res.status(500);
-                                res.send(error);
+                        user.password = hashedPassword;
+                        this.userProvider.getUser(user.name, (oldUser, _) => {
+                            if(oldUser !== undefined) {
+                                res.status(409);
+                                res.send('Nickname already in use');
+                                return;
                             }
+                            this.userProvider.createUser(user, (newUser, error) => {
+                                if(newUser !== undefined) {
+                                    res.status(200);
+                                    res.send(JSON.stringify(newUser));
+                                } else {
+                                    res.status(500);
+                                    res.send(error);
+                                }
+                            });
                         });
                     });
                 } else {
@@ -120,7 +133,7 @@ class UserController {
                 }
             });
         });
-    }
+    };
 
     /*
     * Returns the user with the id provided in the url.

@@ -6,13 +6,14 @@ class ChatWebSocket {
 
     message: Message;
     chatRoomProvider: Provider;
+    translatorService: TranslatorService;
 
-    constructor(io, Message: Message, chatRoomProvider: Provider, requestLib) {
+    constructor(io, Message: Message, chatRoomProvider: Provider, translatorService: TranslatorService) {
         this.Message = Message;
         this.namespace = io.of('/chat-room');
         this.assignCallbacks();
         this.chatRoomProvider = chatRoomProvider;
-        this.request = requestLib;
+        this.translatorService = translatorService;
     }
 
     /*
@@ -45,11 +46,8 @@ class ChatWebSocket {
             const message: Message | FileMessage = JSON.parse(msg);
             const room: ChatRoom = this.chatRoomProvider.getModel(message.roomId);
 
-            this.request({url: 'https://eu-de.functions.cloud.ibm.com/api/v1/web/Gianluca.Scolaro%40Student.Reutlingen-University.DE_dev/hrt-demo/identify-and-translate', qs:{text: message.text}}, (error, response, body) => {
-                if (!error && response.statusCode === 200) {
-                    const translations = JSON.parse(response.body).translations;
-                    message.text = translations !== undefined ? translations : message.text;
-                }
+            this.translatorService.translatate(message.text, (translatedMessage) => {
+                message.text = translatedMessage;
                 messageTranslated(message);
                 room.messages.push(message);
                 if (message.messageType === 'UserMessage') {
@@ -60,6 +58,7 @@ class ChatWebSocket {
                     console.log(message.userName + "(" + message.roomId +"): " + message.fileName)
                 }
             });
+
         });
     }
 
