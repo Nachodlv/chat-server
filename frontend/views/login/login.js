@@ -64,7 +64,7 @@ function loginUser(nickname, pass): void {
         data: JSON.stringify(new User(nickname, pass)),
         processData: false,
         success: function(msg) {
-            CookieService.setCookie('user', msg, 1);
+            CookieService.setCookie('userId', JSON.parse(msg).id, 1);
             window.location.href = '/';
         },
         error: function (xhr) {

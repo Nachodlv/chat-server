@@ -7,22 +7,18 @@ import User from "../models/user.js";
 * */
 export class AuthService {
     static isAuthorized(onSuccess: (User) => void, onFailure: () => void): void {
-        const cookie = CookieService.getCookie('user');
+        const cookie = CookieService.getCookie('userId');
         if (cookie === '') {
             this._failToAuthorize(onFailure);
             return;
         }
-        const user = JSON.parse(cookie);
-        if(user.id === undefined) {
-            this._failToAuthorize(onFailure);
-            return;
-        }
+        const id = Number(cookie);
         $.ajax({
             type: "GET",
             beforeSend: (request) => {
                 request.setRequestHeader("Content-Type", "application/json");
             },
-            url: "/user/" + user.id,
+            url: "/user/" + id,
             processData: false,
             success: (msg) => {
                 onSuccess(JSON.parse(msg));
@@ -34,7 +30,7 @@ export class AuthService {
     }
 
     static _failToAuthorize(onFailure: () => void) {
-        window.document.cookie = '';
+        CookieService.removeCookie('userId');
         onFailure();
     }
 
