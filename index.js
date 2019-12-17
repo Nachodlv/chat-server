@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
@@ -12,27 +13,58 @@ const requestLib = require('request');
 const connection = require('./database');
 const bCrypt = require('bcrypt');
 
+const local: boolean = process.argv[2] === 'local';
+let io;
+if (!local) {
+    function requireHTTPS(req, res, next) {
+        if (req.headers && (req.headers['x-forwarded-proto'] === 'https' || req.headers['x-forwarded-proto'] === 'wss')) {
+            next();
+            return;
+        }
+        console.log(req.headers);
+        res.status(404);
+        res.send('connection not secure');
+    }
+
+    app.use(requireHTTPS);
+
+    const server = http.Server(app).listen(port, function () {
+        console.log("listening on: " + port);
+    });
+    io = require('socket.io').listen(http);
+
+} else {
+    const server = https.createServer({
+        key: fs.readFileSync('./certificates/key.pem'),
+        cert: fs.readFileSync('./certificates/cert.pem'),
+        passphrase: 'chatexample'
+    }, app);
+    server.listen(port);
+
+    io = require('socket.io').listen(server);
+    io.set('transports', ['websocket',
+        'flashsocket',
+        'htmlfile',
+        'xhr-polling',
+        'jsonp-polling',
+        'polling']);
+
+
+    io.set('transports', ['websocket',
+        'flashsocket',
+        'htmlfile',
+        'xhr-polling',
+        'jsonp-polling',
+        'polling']);
+
+}
+
+
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(skipper());
 app.use(express.static(__dirname + '/frontend/'));
 app.use(express.static(__dirname + '/frontend/views/'));
-
-
-const server = https.createServer({
-    key: fs.readFileSync('./certificates/key.pem'),
-    cert: fs.readFileSync('./certificates/cert.pem'),
-    passphrase: 'chatexample'
-}, app);
-server.listen(port);
-
-const io = require('socket.io').listen(server);
-io.set('transports', ['websocket',
-    'flashsocket',
-    'htmlfile',
-    'xhr-polling',
-    'jsonp-polling',
-    'polling']);
 
 const Provider = require('./backend/providers/provider.js');
 const UserProvider = require('./backend/providers/user_provider.js');

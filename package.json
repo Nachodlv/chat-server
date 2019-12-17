@@ -18,6 +18,7 @@
   },
   "scripts": {
     "start": "rm -R -f lib && flow-remove-types ./ -d ./lib/ -p --all -x .html,.css,.js --quiet; node lib/index.js",
+    "start-local": "rm -R -f lib && flow-remove-types ./ -d ./lib/ -p --all -x .html,.css,.js --quiet; node lib/index.js local",
     "flow": "flow",
     "flow:check": "flow check ./",
     "flow:build": "flow-remove-types ./ -d ./lib/ --all --pretty"
