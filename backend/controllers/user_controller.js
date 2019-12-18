@@ -5,12 +5,13 @@ class UserController {
     dirname: string;
     userProvider: UserProvider;
     encryptionService: EncryptionService;
-    constructor(app, userProvider: UserProvider, dirname: string, requestLib, encryptionService) {
+    constructor(app, userProvider: UserProvider, dirname: string, requestLib, encryptionService, fs) {
         this.app = app;
         this.userProvider = userProvider;
         this.dirname = dirname;
         this.request = requestLib;
         this.encryptionService = encryptionService;
+        this.fs = fs;
         this.loginView();
         this.registerView();
         this.loginUser();
@@ -97,7 +98,7 @@ class UserController {
         this.app.post('/register', (req, res) => {
             const user = req.body;
             this.validateImage(user.imgPath, req.headers.origin, (isValid, status) => {
-                if (!isValid) {
+                if (isValid) {
                     this.encryptionService.hashPassword(user.password, (hashedPassword) => {
                         if(hashedPassword === undefined) {
                             res.status(500);
@@ -130,10 +131,22 @@ class UserController {
                         res.status(500);
                         res.send('Internal Server Error');
                     }
+                    console.log('GIANNIIIIIII: ' + user.imgPath);
+                    this.removeFile(user.imgPath);
                 }
             });
         });
     };
+
+    removeFile(path) {
+        this.fs.unlink(path, (err) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            //file removed
+        })
+    }
 
     /*
     * Returns the user with the id provided in the url.
