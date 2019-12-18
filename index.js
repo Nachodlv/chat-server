@@ -12,6 +12,7 @@ const skipper = require('skipper');
 const requestLib = require('request');
 const bCrypt = require('bcrypt');
 
+
 const local: boolean = process.argv[2] === 'local';
 let io;
 if (!local) {
@@ -65,6 +66,7 @@ app.use(cookieParser());
 app.use(skipper());
 app.use(express.static(__dirname + '/frontend/'));
 app.use(express.static(__dirname + '/frontend/views/'));
+app.use(require('helmet')());
 
 const Provider = require('./backend/providers/provider.js');
 const UserProvider = require('./backend/providers/user_provider.js');
