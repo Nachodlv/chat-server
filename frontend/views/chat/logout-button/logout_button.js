@@ -11,7 +11,7 @@ export function addLogoutButton(serverSocket, chatSocket) {
 }
 
 function logout(serverSocket, chatSocket) {
-    CookieService.removeCookie('user');
+    CookieService.removeCookie('userId');
     serverSocket.disconnect(true);
     chatSocket.disconnect(true);
     window.location.href = '/login';
