@@ -89,7 +89,7 @@ class UserController {
         const id = path.substring(path.lastIndexOf('/') + 1);
         this.getUserImage(path, id);
         this.request({url: 'https://eu-de.functions.cloud.ibm.com/api/v1/web/7e9d533d-cf28-46d0-8942-ce49cc1cfd0e/visual-recog-actions/clasify-image', qs:{url: origin + '/image/' + id}}, (error, response, body) => {
-            callback(!error && response.statusCode === 200 && response.length, response.statusCode)
+            callback(!error && response.statusCode === 200 && JSON.parse(response.body).array.length, response.statusCode)
         });
     }
 
