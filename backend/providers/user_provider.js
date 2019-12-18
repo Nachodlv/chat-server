@@ -63,7 +63,7 @@ class UserProvider {
     }
 
     userTableToModel(user: any): User {
-        user.chatRooms = this.userChatRooms[user.id];
+        user.chatRooms = this.userChatRooms[user[0]];
         return new this.User(user);
     }
 

@@ -1,8 +1,8 @@
-
 /*
 * Add the html from user_list.html to the DOM where the function is called.
 * */
 export function addChatList(users: User[] = []) {
+
     $.get("./chat/user-list/user_list.html", (data) => {
         $('#chat-list').html(data);
         users.forEach(addUser);
@@ -15,12 +15,19 @@ export function addChatList(users: User[] = []) {
 export function addUser(user: User) {
     $('#user-list').append(`
         <div class="dropdown-item" id="${user.name}">
-            <div class="row justify-content-between">
-                <div class="user-name">${user.name}</div>
-                <i class="${getIconClass(user.online)}">brightness_1</i>
+            <div rel='tooltip' data-original-title='${getUserImage(user)}'>
+                <div class="row justify-content-between">
+                    <div class="user-name">
+                        ${user.name}
+                    </div>
+                    <i class="${getIconClass(user.online)}">brightness_1</i>
+                </div>
             </div>
         </div>
     `);
+    $(function () {
+        $("[rel='tooltip']").tooltip({html: true});
+    });
 }
 
 /*
@@ -35,5 +42,13 @@ export function onUserStatusChange(userName: string, online: boolean) {
 * */
 function getIconClass(status: boolean): string {
     return `material-icons online-icon ${status ? 'online' : 'offline'} user-status`;
+}
+
+function getImageId(imgPath: string): string {
+    return imgPath.substring(0, imgPath.length - 1).replace(/\//g, "%2F");
+}
+
+function getUserImage(user: User): string {
+    return `<img height="60" data-placement="left" src="${window.location.href}image/${getImageId(user.imgPath)}">`;
 }
 
