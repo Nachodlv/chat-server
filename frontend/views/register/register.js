@@ -105,7 +105,7 @@ function registerUser(nickname, pass, path): void {
         data: JSON.stringify(new User(nickname, pass, path)),
         processData: false,
         success: function(msg) {
-            CookieService.setCookie('user', JSON.parse(msg).id, 1);
+            CookieService.setCookie("userId", JSON.parse(msg).id, 1);
             window.location.href = '/';
         },
         error: function (xhr) {

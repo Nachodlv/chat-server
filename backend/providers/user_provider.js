@@ -33,7 +33,7 @@ class UserProvider {
                                 VALUES ('${user.name}', '${user.password}', ${user.online}, '${user.imgPath};'))`,
             (body, error) => {
                 if(body.results.length > 0 && body.results[0].rows.length > 0) {
-                    user.id = body.results[0].rows[0][0];
+                    user.id = Number(body.results[0].rows[0][0]);
                     callback(user, "");
                 } else callback(undefined, "Error occurred while trying to create the user")
             });
