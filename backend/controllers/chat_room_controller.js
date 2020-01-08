@@ -34,7 +34,7 @@ class ChatRoomController {
     * */
     getChatRoom() {
         this.app.get('/chat-room/:roomId*', (req, res) => {
-            const userId = JSON.parse(req.cookies.user).id;
+            const userId = Number(req.cookies.userId);
             const roomId = Number(req.params['roomId']);
             const room = this.chatRoomProvider.getModel(roomId);
             if (!room) {
@@ -53,21 +53,29 @@ class ChatRoomController {
     * */
     getChatRooms() {
         this.app.get('/chat-rooms', (req, res) => {
-            const userNickname = JSON.parse(req.cookies.user).name;
-            const roomIds = Array.isArray(req.query.ids) ? req.query.ids : [req.query.ids];
-            const rooms = roomIds.map(roomId => this.chatRoomProvider.getModel(Number(roomId)));
-            if (!rooms || rooms.length === 0) {
-                res.status(404);
-                res.send('No chat room found for current user');
-                return;
-            } else if (rooms.filter(r => !r).length !== 0) {
-                res.status(404);
-                res.send('Invalid room id');
-                return;
-            }
-            res.status(200);
-            const rooms2 = rooms.map(room => this._attachPrivateMessage(room, userNickname));
-            res.send(JSON.stringify(rooms2));
+            this.userProvider.getUserById(req.cookies.userId, (user, error) => {
+                if(user) {
+                    const userNickname = user.name;
+                    const roomIds = Array.isArray(req.query.ids) ? req.query.ids : [req.query.ids];
+                    const rooms = roomIds.map(roomId => this.chatRoomProvider.getModel(Number(roomId)));
+                    if (!rooms || rooms.length === 0) {
+                        res.status(404);
+                        res.send('No chat room found for current user');
+                        return;
+                    } else if (rooms.filter(r => !r).length !== 0) {
+                        res.status(404);
+                        res.send('Invalid room id');
+                        return;
+                    }
+                    res.status(200);
+                    const rooms2 = rooms.map(room => this._attachPrivateMessage(room, userNickname));
+                    res.send(JSON.stringify(rooms2));
+                } else {
+                    res.status(403);
+                    res.send("You need to be logged in");
+                }
+            });
+
         });
     }
 
