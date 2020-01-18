@@ -1,15 +1,16 @@
 
 class ChatRoom {
     name: string;
-    messages: string[];
+    messages: Message[];
     id: number;
     users: User[];
 
-    constructor(name: string, ownerId: number) {
+    constructor(name: string, ownerId: number, id?: number, users?: User[], messages: Message[]) {
+        this.id = id;
         this.name = name;
-        this.messages = [];
+        this.messages = messages ? messages : [];
         this.ownerId = ownerId;
-        this.users = [];
+        this.users = users ? users : [];
     }
 
 }

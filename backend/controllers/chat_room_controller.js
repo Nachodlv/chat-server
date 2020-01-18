@@ -3,11 +3,11 @@
 * */
 class ChatRoomController {
     dirname: string;
-    chatRoomProvider: Provider;
+    chatRoomProvider: ChatRoomProvider;
     userProvider: UserProvider;
     privateMessageProvider: Provider;
 
-    constructor(app, chatRoomProvider: Provider, userProvider: UserProvider, privateMessagesProvider: Provider, dirname: string) {
+    constructor(app, chatRoomProvider: ChatRoomProvider, userProvider: UserProvider, privateMessagesProvider: Provider, dirname: string) {
         this.app = app;
         this.chatRoomProvider = chatRoomProvider;
         this.userProvider = userProvider;
@@ -36,14 +36,16 @@ class ChatRoomController {
         this.app.get('/chat-room/:roomId*', (req, res) => {
             const userId = Number(req.cookies.userId);
             const roomId = Number(req.params['roomId']);
-            const room = this.chatRoomProvider.getModel(roomId);
-            if (!room) {
-                res.status(404);
-                res.send('No chat room found with id: ' + roomId);
-                return;
-            }
-            res.status(200);
-            res.send(JSON.stringify(this._attachPrivateMessage(room, userId)));
+            // const room = this.chatRoomProvider.getModel(roomId);
+            this.chatRoomProvider.getChatRoomById(roomId, (room, _) => {
+                if (!room) {
+                    res.status(404);
+                    res.send('No chat room found with id: ' + roomId);
+                    return;
+                }
+                res.status(200);
+                res.send(JSON.stringify(this._attachPrivateMessage(room, userId)));
+            });
         });
     }
 
@@ -56,20 +58,23 @@ class ChatRoomController {
             this.userProvider.getUserById(req.cookies.userId, (user, error) => {
                 if(user) {
                     const userNickname = user.name;
-                    const roomIds = Array.isArray(req.query.ids) ? req.query.ids : [req.query.ids];
-                    const rooms = roomIds.map(roomId => this.chatRoomProvider.getModel(Number(roomId)));
-                    if (!rooms || rooms.length === 0) {
-                        res.status(404);
-                        res.send('No chat room found for current user');
-                        return;
-                    } else if (rooms.filter(r => !r).length !== 0) {
-                        res.status(404);
-                        res.send('Invalid room id');
-                        return;
-                    }
-                    res.status(200);
-                    const rooms2 = rooms.map(room => this._attachPrivateMessage(room, userNickname));
-                    res.send(JSON.stringify(rooms2));
+                    const roomIds: number[] = Array.isArray(req.query.ids) ? req.query.ids.map(id => Number(id)) : [Number(req.query.ids)];
+                    // const rooms = roomIds.map(roomId => this.chatRoomProvider.getModel(Number(roomId)));
+                    this.chatRoomProvider.getChatRoomsByIds(roomIds, (rooms, _) => {
+                        if (!rooms || rooms.length === 0) {
+                            res.status(404);
+                            res.send('No chat room found for current user');
+                            return;
+                        }
+                        else if (rooms.length !== roomIds.length) {
+                            res.status(404);
+                            res.send('Invalid room id');
+                            return;
+                        }
+                        res.status(200);
+                        const rooms2 = rooms.map(room => this._attachPrivateMessage(room, userNickname));
+                        res.send(JSON.stringify(rooms2));
+                    });
                 } else {
                     res.status(403);
                     res.send("You need to be logged in");
@@ -93,9 +98,18 @@ class ChatRoomController {
                    return;
                }
                room.users.push(user);
-               const newRoom = this.chatRoomProvider.createModel(room);
-               user.chatRooms.push(newRoom.id);
-               this.userProvider.updateUser(user, (updatedUser, error) => {
+               // const newRoom = this.chatRoomProvider.createModel(room);
+               this.chatRoomProvider.createChatRoom(room, (newRoom, error) => {
+                   if (!error && newRoom !== undefined) {
+                       user.chatRooms.push(newRoom.id);
+                       res.status(200);
+                       res.send(JSON.stringify(newRoom));
+                   } else {
+                       res.status(500);
+                       res.send("Error while creating chat room");
+                   }
+               })
+               /*this.userProvider.updateUser(user, (updatedUser, error) => {
                    if(!error && updatedUser !== undefined) {
                        res.status(200);
                        res.send(JSON.stringify(newRoom));
@@ -103,8 +117,7 @@ class ChatRoomController {
                        res.status(500);
                        res.send("Error while updating the user");
                    }
-               });
-
+               });*/
            });
         });
     }

@@ -1,26 +1,21 @@
 class UserProvider {
 
-    userChatRooms: Map<number, number[]>;
-    url: string;
-
-    constructor(databaseConnection: DatabaseConnection, User, request) {
-        this.request = request;
+    constructor(User, db2Service: Db2Service) {
         this.User = User;
-        this.userChatRooms = new Map();
-        databaseConnection.connect((token, _) => {
-            this.authHeader = {
-                "Authorization": "Bearer " + token,
-                "Content-Type": "application/json"
-            };
-        });
-        this.url = process.env.DB_HOST + "/dbapi/v3/sql_jobs";
+        this.db2Service = db2Service;
+        //TEST
+        /*this.createUser(new User(
+            ["", "Pepe", "false","password123", "/Users/gianni/Projects/facultad/cloud-computing/chat-server-2/.tmp/uploads/24bd52ba-e6b6-4058-bc2e-defaf2ed850b.jpg"]
+        ), (newUser, error) => {
+            console.log(newUser)
+        })*/
     }
 
     getUser(name: string, callback: (user: User, error: string) => void) {
-        this.executeSql(`SELECT * FROM GXQ26433.user where name='${name}'`, (body, error) => {
+        this.db2Service.executeSql(`SELECT * FROM QQL85939.user where name='${name}'`, (body, error) => {
             if (!error) {
                 if(body.results.length > 0 && body.results[0].rows.length > 0) {
-                    callback(this.userTableToModel(body.results[0].rows[0]));
+                    this.getUserChatRooms(body.results[0].rows[0][0],body.results[0].rows[0], callback)
                 } else callback(undefined, "No user was found with that name");
             } else {
                 callback(undefined, "An error occurred while trying to get the user")
@@ -29,7 +24,7 @@ class UserProvider {
     }
 
     createUser(user: User, callback: (user: User, error: string) => void) {
-        this.executeSql(`SELECT ID FROM FINAL TABLE (INSERT INTO GXQ26433.USER (NAME, PASSWORD, ONLINE, IMGPATH) 
+        this.db2Service.executeSql(`SELECT ID FROM FINAL TABLE (INSERT INTO QQL85939.USER (NAME, PASSWORD, ONLINE, IMGPATH) 
                                 VALUES ('${user.name}', '${user.password}', ${user.online}, '${user.imgPath};'))`,
             (body, error) => {
                 if(body.results.length > 0 && body.results[0].rows.length > 0) {
@@ -40,56 +35,43 @@ class UserProvider {
     }
 
     getUserById(id: string, callback: (user: User, error: string) => void) {
-        this.executeSql("SELECT * FROM GXQ26433.user where id = " + id, (body, error) => {
+        this.db2Service.executeSql("SELECT * FROM QQL85939.user where id = " + id, (body, error) => {
             if (!error) {
                 if(body.results.length > 0 && body.results[0].rows.length > 0) {
-                    callback(this.userTableToModel(body.results[0].rows[0]));
+                    this.getUserChatRooms(body.results[0].rows[0][0], body.results[0].rows[0], callback)
                 } else callback(undefined, "No user was found with that id");
             } else callback(undefined, "An error occurred while trying to get the user " + id);
         });
     }
 
+    getUserChatRooms(userId: number, userRow: any, callback: (user: User, error: string) => void) {
+        this.db2Service.executeSql(`SELECT * FROM QQL85939.USER_CHAT_ROOM where USER_ID='${userId}'`, (body, error) => {
+            if (!error) {
+                if(body.results.length > 0 && body.results[0].rows.length > 0) {
+                    callback(this.userTableToModel(userRow, body.results[0].rows));
+                } else callback(this.userTableToModel(userRow));
+            } else {
+                callback(undefined, "An error occurred while trying to get the user's chat rooms")
+            }
+        }, false);
+    }
+
     updateUser(user: User, callback: (user: User, error: string) => void) {
-        this.updateChatRooms(user);
-        this.executeSql(`UPDATE GXQ26433.USER SET ONLINE = ${user.online} WHERE ID = ${user.id}`, (body, error) => {
+        // this.updateChatRooms(user);
+        this.db2Service.executeSql(`UPDATE QQL85939.USER SET ONLINE = ${user.online} WHERE ID = ${user.id}`, (body, error) => {
             if(body.results.length > 0 && body.results[0].rows_affected === 1) {
                 callback(user);
             } else callback(undefined, "An error occurred while trying to update the user");
         });
     }
 
-    updateChatRooms(user: User): any {
+    /*updateChatRooms(user: User): any {
         this.userChatRooms[user.id] = user.chatRooms;
-    }
+    }*/
 
-    userTableToModel(user: any): User {
-        user.chatRooms = this.userChatRooms[user[0]];
-        return new this.User(user);
-    }
-
-    generateSql(query: string) {
-        return {
-            "commands": query,
-            "limit": 1,
-            "separator": ";",
-            "stop_on_error": "yes"
-        }
-    }
-
-    executeSql(query: string, callback: (body: any, error: string) => void) {
-        this.request.post({
-            url: this.url,
-            json: this.generateSql(query),
-            headers: this.authHeader
-        }, (error, response, body) => {
-            if (!error && response.statusCode === 201) {
-                this.request.get({url: this.url + "/" + body.id, headers: this.authHeader}, (error2, response2, body2) => {
-                    if (!error2 && response2.statusCode === 200) {
-                        callback(JSON.parse(body2));
-                    } else callback(undefined, error2);
-                });
-            } else callback(undefined, error);
-        });
+    userTableToModel(userRow: any, chatRoomRows: any = []): User {
+        userRow.chatRooms = chatRoomRows.map(row => Number(row[1]));
+        return new this.User(userRow);
     }
 }
 

@@ -5,10 +5,10 @@
 class ChatWebSocket {
 
     message: Message;
-    chatRoomProvider: Provider;
+    chatRoomProvider: ChatRoomProvider;
     translatorService: TranslatorService;
 
-    constructor(io, Message: Message, chatRoomProvider: Provider, translatorService: TranslatorService) {
+    constructor(io, Message: Message, chatRoomProvider: ChatRoomProvider, translatorService: TranslatorService) {
         this.Message = Message;
         this.namespace = io.of('/chat-room');
         this.assignCallbacks();
@@ -44,19 +44,26 @@ class ChatWebSocket {
     onMessage(socket) {
         socket.on('chat message', (msg, messageTranslated: (Message) => void) => {
             const message: Message | FileMessage = JSON.parse(msg);
-            const room: ChatRoom = this.chatRoomProvider.getModel(message.roomId);
+            // message.timeStamp = new Date(message.timeStamp);
+            // const room: ChatRoom = this.chatRoomProvider.getModel(message.roomId);
 
             this.translatorService.translatate(message.text, (translatedMessage) => {
                 message.text = translatedMessage;
                 messageTranslated(message);
-                room.messages.push(message);
-                if (message.messageType === 'UserMessage') {
-                    socket.to(message.roomId).emit('chat message', JSON.stringify(message));
-                    console.log(message.userName + "(" + message.roomId +"): " + message.text)
-                } else {
-                    socket.to(message.roomId).emit('chat file message', JSON.stringify(message));
-                    console.log(message.userName + "(" + message.roomId +"): " + message.fileName)
-                }
+                // room.messages.push(message);
+                this.chatRoomProvider.saveMessage(message, (newMessage, error) => {
+                    if (newMessage === undefined) {
+                        console.log(error);
+                        return;
+                    }
+                    if (message.messageType === 'UserMessage') {
+                        socket.to(message.roomId).emit('chat message', JSON.stringify(message));
+                        console.log(message.userName + "(" + message.roomId +"): " + message.text)
+                    } else {
+                        socket.to(message.roomId).emit('chat file message', JSON.stringify(message));
+                        console.log(message.userName + "(" + message.roomId +"): " + message.fileName)
+                    }
+                });
             });
 
         });

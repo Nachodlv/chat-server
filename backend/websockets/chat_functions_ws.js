@@ -3,12 +3,12 @@
 * */
 module.exports = class ChatFunctionWebSocket {
     userProvider: UserProvider;
-    roomProvider: Provider;
+    roomProvider: ChatRoomProvider;
     Message: Message;
     MessageType: MessageType;
     chatWs: ChatWebSocket;
 
-    constructor(io, userProvider: UserProvider, roomProvider: Provider, Message: Message, chatWs: ChatWebSocket, MessageType: MessageType) {
+    constructor(io, userProvider: UserProvider, roomProvider: ChatRoomProvider, Message: Message, chatWs: ChatWebSocket, MessageType: MessageType) {
         this.userProvider = userProvider;
         this.roomProvider = roomProvider;
         this.chatWs = chatWs;
@@ -24,8 +24,8 @@ module.exports = class ChatFunctionWebSocket {
     assignCallbacks() {
         this.namespace.on('connection', (socket) => {
             this.onChatRoomInvite(socket);
-            this.onChatRoomKick(socket);
-            this.onDeleteChatRoom(socket);
+            // this.onChatRoomKick(socket);
+            // this.onDeleteChatRoom(socket);
         });
     }
 
@@ -38,38 +38,52 @@ module.exports = class ChatFunctionWebSocket {
     onChatRoomInvite(socket) {
         socket.on('invite', (data, fn: (user: User, containsError: boolean, errorMessage: string) => void) => {
             const room: ChatRoom = this.roomProvider.getModel(data.roomId);
-            if (!room) {
-                fn(undefined, true, 'The room does not exist');
-                return;
-            }
-            this.userProvider.getUser(data.nickname, (user, _) => {
-                if (user === undefined) {
-                    fn(user, true, 'The user does not exists');
+            this.roomProvider.getChatRoomById(data.roomId, (room, error) => {
+                if (!room) {
+                    fn(undefined, true, 'The room does not exist');
                     return;
                 }
-                if (room.users.find(u => u.id === user.id)) {
-                    fn(user, true, 'The user is already in the chat room');
-                    return;
-                }
-                room.users.push(user);
-                user.chatRooms.push(room.id);
-                this.userProvider.updateUser(user, (userUpdated, _) => {
-                    fn(userUpdated, false);
-                    socket.to(userUpdated.id).emit('invite', room);
-                    this.chatWs.sendMessageToChat(room.id, new this.Message(`${userUpdated.name} has joined the group!`,
-                        userUpdated.name, this.MessageType.ServerMessage, room.id));
-                    console.log(`${data.nickname} was invited to ${room.name}`)
+                this.userProvider.getUser(data.nickname, (user, _) => {
+                    if (user === undefined) {
+                        fn(user, true, 'The user does not exists');
+                        return;
+                    }
+                    if (room.users.find(u => u.id === user.id)) {
+                        fn(user, true, 'The user is already in the chat room');
+                        return;
+                    }
+                    room.users.push(user);
+
+                    this.roomProvider.addUserToChatRoom(user.id, room.id, (error) => {
+                        if (error) {
+                            fn(user, true, error);
+                            return;
+                        }
+                        user.chatRooms.push(room.id);
+                        fn(user, false);
+                        socket.to(user.id).emit('invite', room);
+                        this.chatWs.sendMessageToChat(room.id, new this.Message(`${user.name} has joined the group!`,
+                            user.name, this.MessageType.ServerMessage, room.id));
+                        console.log(`${data.nickname} was invited to ${room.name}`)
+                    })
+
+                    /*this.userProvider.updateUser(user, (userUpdated, _) => {
+                        fn(userUpdated, false);
+                        socket.to(userUpdated.id).emit('invite', room);
+                        this.chatWs.sendMessageToChat(room.id, new this.Message(`${userUpdated.name} has joined the group!`,
+                            userUpdated.name, this.MessageType.ServerMessage, room.id));
+                        console.log(`${data.nickname} was invited to ${room.name}`)
+                    });*/
+
                 });
-
             });
-
         })
     }
 
     /*
     * When someone kick an user from a group the function remove this user from the chat and notifies the user kicked.
     * */
-    onChatRoomKick(socket) {
+    /*onChatRoomKick(socket) {
         socket.on('kick', (roomId: number, userId: number) => {
             this.userProvider.getUserById(userId, (user, _) => {
                 const room: ChatRoom = this.roomProvider.getModel(roomId);
@@ -85,12 +99,12 @@ module.exports = class ChatFunctionWebSocket {
                 });
             });
         });
-    }
+    }*/
 
     /*
     * When a chat room is deleted the function deletes the chat and notifies the members of the chat.
     * */
-    onDeleteChatRoom(socket) {
+    /*onDeleteChatRoom(socket) {
         socket.on('delete', (roomId: number) => {
             const room: ChatRoom = this.roomProvider.getModel(roomId);
             if (!room) return;
@@ -106,5 +120,5 @@ module.exports = class ChatFunctionWebSocket {
                 });
             });
         })
-    }
+    }*/
 };
