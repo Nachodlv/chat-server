@@ -8,7 +8,7 @@ class ChatWebSocket {
     chatRoomProvider: Provider;
     translatorService: TranslatorService;
 
-    constructor(io, Message: Message, chatRoomProvider: Provider, translatorService: TranslatorService) {
+    constructor(io, Message: Message, chatRoomProvider: Provider, translatorService: TranslatorService, redis) {
         this.Message = Message;
         this.namespace = io.of('/chat-room');
         this.assignCallbacks();

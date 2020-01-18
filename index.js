@@ -5,12 +5,17 @@ const app = express();
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
-const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const skipper = require('skipper');
 const requestLib = require('request');
 const bCrypt = require('bcrypt');
+const redis = require('socket.io-redis');
+
+const port = process.argv[3]? process.argv[3].split('--port=')[1] : process.env.PORT || 3000;
+const cors = require('cors');
+app.use(cors());
+app.options('*', cors());
 
 
 const local: boolean = process.argv[2] === 'local';
@@ -92,3 +97,6 @@ const onlineWs = new (require('./backend/websockets/online_ws.js'))(io, userProv
 const chatFunctionsWs = new (require('./backend/websockets/chat_functions_ws.js'))(io, userProvider, roomProvider, Message, chatWs, MessageType);
 const privateMessagesWs = new (require('./backend/websockets/private_messages_ws.js'))(io, privateMessagesProvider, roomProvider, translatorService);
 
+const ipProvider = new(require('./backend/providers/ip_provider.js'))();
+const ipController = new(require('./backend/controllers/ip_controller.js'))(app, ipProvider);
+const registerIP = new (require('./backend/services/register_ip.js'))(port, requestLib, 'https://localhost:1234');

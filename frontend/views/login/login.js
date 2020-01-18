@@ -6,20 +6,31 @@
 import User from "../../models/user.js";
 import {CookieService} from "../../services/cookie-service.js";
 import {AuthService} from "../../services/auth-service.js";
+import {IpService} from "../../services/ip-service.js";
+
+const ipService = new IpService();
 
 /*
 * Function that executes when the file is imported in login.html
 * Check if a user is logged in.
 * */
 $(function () {
-    AuthService.isAuthorized(() => {
-        window.location.href = '/';
-    }, initLogin)
+    ipService.getId((id) => {
+        AuthService.isAuthorized(() => {
+            window.location.href = '/';
+        }, () => initLogin(id))
+    })
+
 });
 
-function initLogin() {
+function initLogin(id:string) {
+    setId(id);
     onSubmit();
     onRegisterClick();
+}
+
+function setId(id: string) {
+    $('#instance-id')[0].innerHTML = `ID: ${id}`;
 }
 
 /*
