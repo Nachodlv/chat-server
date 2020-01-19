@@ -1,9 +1,11 @@
 class ChatRoomProvider {
 
-    constructor(ChatRoom, User, Message, db2Service: Db2Service) {
+    constructor(ChatRoom, User, Message, FileMessage, MessageType, db2Service: Db2Service) {
         this.ChatRoom = ChatRoom;
         this.User = User;
         this.Message = Message;
+        this.FileMessage = FileMessage;
+        this.MessageType = MessageType;
         this.db2Service = db2Service;
 
         //TEST
@@ -151,9 +153,14 @@ class ChatRoomProvider {
         });
     }
 
-    saveMessage(message: Message, callback: (newMessage: Message, error: string) => void) {
-        this.db2Service.executeSql(`SELECT * FROM FINAL TABLE (INSERT INTO QQL85939.MESSAGE (TEXT, CHAT_ROOM_ID, USERNAME, TIMESTAMP, TYPE) 
-                                VALUES ('${message.text}', integer('${message.roomId}'), '${message.userName}', '${this.formatTimeStampString(message.timeStamp)}', '${message.messageType}'))`,
+    saveMessage(message: Message | FileMessage, callback: (newMessage: Message | FileMessage, error: string) => void) {
+        const msgQuery = `INSERT INTO QQL85939.MESSAGE (TEXT, USER_NAME, TIME_STAMP, TYPE, CHAT_ROOM_ID) 
+                                VALUES ('${message.text}', '${message.userName}', '${this.formatTimeStampString(message.timeStamp)}', '${message.messageType}', integer('${message.roomId}'))`;
+        const fileMsgQuery = `INSERT INTO QQL85939.MESSAGE (TEXT, USER_NAME, TIME_STAMP, TYPE, CHAT_ROOM_ID, FILE_NAME, FILE_TYPE, FILE_SIZE, LINK) 
+                                VALUES ('${message.text}', '${message.userName}', '${this.formatTimeStampString(message.timeStamp)}', '${message.messageType}', integer('${message.roomId}'), '${message.fileName}', '${message.fileType}', '${message.fileSize}', '${message.link}')`;
+        const query = `SELECT * FROM FINAL TABLE (${message.messageType === this.MessageType.Multimedia ? fileMsgQuery : msgQuery})`;
+
+        this.db2Service.executeSql(query,
             (body, error) => {
                 if(body.results.length > 0 && body.results[0].rows.length > 0) {
                     message.id = Number(body.results[0].rows[0][0]);
@@ -167,9 +174,14 @@ class ChatRoomProvider {
         const name = rows[0][1];
         const ownerId = Number(rows[0][2]);
         const users = rows.map( row => new this.User(row.slice(3,8))); // TODO users do not have the correct chat_rooms array
-        const messages = messageRows.map( row =>
-            new this.Message(row[1], row[3], row[5], new Date(row[4]), Number(row[2]), Number(row[0]))
-        );
+        const messages = messageRows.map( row => {
+            const type = row[4];
+            if (type === this.MessageType.Multimedia) {
+                new this.FileMessage(row[6], row[7], row[8], row[9], row[1], row[2], type, new Date(row[3]), Number(row[5]), Number(row[0]))
+            } else {
+                new this.Message(row[1], row[2], type, new Date(row[3]), Number(row[5]), Number(row[0]))
+            }
+        });
         return new this.ChatRoom(name, ownerId, id, users, messages);
     }
 

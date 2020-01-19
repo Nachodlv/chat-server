@@ -31,15 +31,15 @@ export class FileMessage extends Message {
     fileName: string;
     fileType: string;
     fileSize: string;
-    data: any;
+    link: string;
 
-    constructor(fileName: string, fileType: string, fileSize: string, data: any, text: string,
+    constructor(fileName: string, fileType: string, fileSize: string, link: string, text: string,
                 userName: string, messageType: string, timeStamp: Date = new Date(), roomId: number) {
         super(text, userName, messageType, timeStamp, roomId);
         this.fileName = fileName;
         this.fileType = fileType;
         this.fileSize = fileSize;
-        this.data = data;
+        this.link = link;
     }
 }
 
@@ -58,9 +58,9 @@ export class PrivateFileMessage extends FileMessage {
 
     nicknames: string[];
 
-    constructor(nicknames: string[], fileName: string, fileType: string, fileSize: string, data: any, text: string,
+    constructor(nicknames: string[], fileName: string, fileType: string, fileSize: string, link: string, text: string,
                 userName: string, messageType: string, timeStamp: Date = new Date(), roomId: number) {
-        super(fileName, fileType, fileSize, data, text, userName, messageType, timeStamp, roomId);
+        super(fileName, fileType, fileSize, link, text, userName, messageType, timeStamp, roomId);
         this.nicknames = nicknames;
     }
 }

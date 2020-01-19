@@ -71,7 +71,8 @@ function showUserInvite() {
 * Function that un-hides the message bar when group is selected.
 * */
 function showMessageBar() {
-    $('#message-form:hidden')[0].style['display'] = 'flex'
+    const bar = $('#message-form:hidden')[0];
+    if(bar) bar.style['display'] = 'flex'
 }
 
 /*
@@ -145,6 +146,7 @@ function onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket
     fileReader.readAsDataURL(file);
     fileReader.onload = (_) => {
         const arrayBuffer = fileReader.result;
+        // TODO change arrayBuffer to cloud storage link
         const msg = new FileMessage(file.name, file.type, file.size, arrayBuffer, input.val(), user.name,
             MessageType.Multimedia, new Date(), group.id);
         group.messages.push(msg);
@@ -193,7 +195,7 @@ function sendPrivateFileMessage(message: FileMessage, serverSocket, groupId: num
     if (res.names.length === 0) return;
 
     const privateMessage: PrivateFileMessage = new PrivateFileMessage(res.names, message.fileName, message.fileType, message.fileSize,
-        message.data, res.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
+        message.link, res.text, message.userName, MessageType.PrivateMultimedia, message.timeStamp, message.roomId);
     serverSocket.emit('private message', privateMessage, (message: Message, error: string) => {
         if(message !== undefined) appendPrivateFileMessage(message, true);
         else if(error !== undefined) onError(error);
@@ -345,12 +347,12 @@ function appendPrivateFileMessage(msg: PrivateFileMessage, isAuthor: boolean) {
 function addFileHTML(msg, node){
     if (msg.fileType.includes('image'))
         node.append($('<div class="file-container">')
-            .append($(`<a href="${msg.data}" download="${msg.fileName}">`)
-                .append($(`<img src="${msg.data}" alt="">`))));
+            .append($(`<a href="${msg.link}" download="${msg.fileName}">`)
+                .append($(`<img src="${msg.link}" alt="">`))));
     else {
         node.append($('<div class="file-container row align-items-center">')
             .append($(`<i class="material-icons">`).text('insert_drive_file'))
-            .append($(`<a href="${msg.data}" download="${msg.fileName}">`).text(msg.fileName)));
+            .append($(`<a href="${msg.link}" download="${msg.fileName}">`).text(msg.fileName)));
     }
     node.append($('<p>').text(msg.text))
         .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));

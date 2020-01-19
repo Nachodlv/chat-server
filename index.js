@@ -71,8 +71,12 @@ app.use(require('helmet')());
 const Provider = require('./backend/providers/provider.js');
 const UserProvider = require('./backend/providers/user_provider.js');
 const ChatRoomProvider = require('./backend/providers/chat_room_provider.js');
+const PrivateMessageProvider = require('./backend/providers/private_message_provider.js');
 const User = require('./backend/models/user.js');
 const Message = require('./backend/models/message.js');
+const FileMessage = require('./backend/models/file_message.js');
+const PrivateMessage = require('./backend/models/private_message.js');
+const PrivateFileMessage = require('./backend/models/private_file_message.js');
 const MessageType = require('./backend/models/message_type.js');
 const ChatRoom = require('./backend/models/chat_room.js');
 
@@ -89,16 +93,16 @@ dataBaseConnection.connect((token, _) => {
     const db2Service = new (require('./backend/services/db2_service.js'))(authHeader, requestLib);
 
     const userProvider = new UserProvider(User, db2Service);
-    const roomProvider = new ChatRoomProvider(ChatRoom, User, Message, db2Service);
-    const privateMessagesProvider = new Provider();
+    const roomProvider = new ChatRoomProvider(ChatRoom, User, Message, FileMessage, MessageType, db2Service);
+    const privateMessageProvider = new PrivateMessageProvider(PrivateMessage, PrivateFileMessage, MessageType, db2Service);
 
     const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname, requestLib, encryptionService, fs);
-    const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessagesProvider, __dirname);
+    const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessageProvider, __dirname);
 
     const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider, translatorService);
     const onlineWs = new (require('./backend/websockets/online_ws.js'))(io, userProvider, Message, MessageType, chatWs);
     const chatFunctionsWs = new (require('./backend/websockets/chat_functions_ws.js'))(io, userProvider, roomProvider, Message, chatWs, MessageType);
-    const privateMessagesWs = new (require('./backend/websockets/private_messages_ws.js'))(io, privateMessagesProvider, roomProvider, translatorService);
+    const privateMessagesWs = new (require('./backend/websockets/private_messages_ws.js'))(io, privateMessageProvider, roomProvider, translatorService);
 });
 
 

@@ -37,7 +37,7 @@ module.exports = class ChatFunctionWebSocket {
     * */
     onChatRoomInvite(socket) {
         socket.on('invite', (data, fn: (user: User, containsError: boolean, errorMessage: string) => void) => {
-            const room: ChatRoom = this.roomProvider.getModel(data.roomId);
+            // const room: ChatRoom = this.roomProvider.getModel(data.roomId);
             this.roomProvider.getChatRoomById(data.roomId, (room, error) => {
                 if (!room) {
                     fn(undefined, true, 'The room does not exist');

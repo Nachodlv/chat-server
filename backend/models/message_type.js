@@ -9,4 +9,4 @@ const MessageType = {
     PrivateMultimedia: 'PrivateMultimedia'
 };
 
-module .exports = MessageType;
+module.exports = MessageType;

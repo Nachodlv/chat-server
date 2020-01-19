@@ -5,9 +5,9 @@ class ChatRoomController {
     dirname: string;
     chatRoomProvider: ChatRoomProvider;
     userProvider: UserProvider;
-    privateMessageProvider: Provider;
+    privateMessageProvider: PrivateMessageProvider;
 
-    constructor(app, chatRoomProvider: ChatRoomProvider, userProvider: UserProvider, privateMessagesProvider: Provider, dirname: string) {
+    constructor(app, chatRoomProvider: ChatRoomProvider, userProvider: UserProvider, privateMessagesProvider: PrivateMessageProvider, dirname: string) {
         this.app = app;
         this.chatRoomProvider = chatRoomProvider;
         this.userProvider = userProvider;
@@ -71,9 +71,17 @@ class ChatRoomController {
                             res.send('Invalid room id');
                             return;
                         }
-                        res.status(200);
-                        const rooms2 = rooms.map(room => this._attachPrivateMessage(room, userNickname));
-                        res.send(JSON.stringify(rooms2));
+                        // const rooms2 = rooms.map(room => this._attachPrivateMessage(room, userNickname));
+                        //TODO test
+                        this._attachPrivateMessage(rooms, userNickname, (newRooms, error) => {
+                            if (error) {
+                                res.status(404);
+                                res.send(error);
+                                return;
+                            }
+                            res.status(200);
+                            res.send(JSON.stringify(newRooms));
+                        })
                     });
                 } else {
                     res.status(403);
@@ -125,12 +133,25 @@ class ChatRoomController {
     /*
     * Attaches the private messages to the chat room.
     * */
-    _attachPrivateMessage(room: ChatRoom, userNickname: string): ChatRoom {
-        const messages: PrivateMessage[] = this.privateMessageProvider.models.filter((message: PrivateMessage) =>
-            message.roomId === room.id && (message.userName === userNickname || message.nicknames.find(nickname => nickname === userNickname)));
-        const clonedRoom: ChatRoom = JSON.parse(JSON.stringify(room));
-        clonedRoom.messages.push(...messages);
-        return clonedRoom;
+    _attachPrivateMessage(rooms: ChatRoom[], userNickname: string, callback: (newRooms: ChatRoom[], error) => void) {
+        this.privateMessageProvider.getPrivateMessagesByRoomsId(rooms.map(r=>r.id), (result: any, error) => {
+            if(error) {
+                callback(undefined, error);
+                return;
+            } else if (result === undefined) {
+                callback(rooms);
+                return;
+            }
+            callback(rooms.map( room => {
+                const messages = result[room.id];
+                if (!messages) return room;
+                const filteredMessages = messages.filter(message =>
+                    message.userName === userNickname || message.nicknames.find(nickname => nickname === userNickname));
+                const clonedRoom: ChatRoom = JSON.parse(JSON.stringify(room));
+                clonedRoom.messages.push(...filteredMessages);
+                return clonedRoom;
+            }))
+        });
     }
 }
 
