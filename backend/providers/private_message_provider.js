@@ -10,7 +10,7 @@ class PrivateMessageProvider {
     getPrivateMessagesByRoomsId(roomIds: number[], callback: (messages: any, error: string) => void) {
         // WHERE clause is executed before join (im not sure)
         this.db2Service.executeSql(
-            `SELECT pm.*
+            `SELECT pm.*, n.*
                     FROM QQL85939.PRIVATE_MESSAGE pm
                     LEFT JOIN QQL85939.PRIVATE_MESSAGE_NICKNAME n
                     ON n.PRIVATE_MESSAGE_ID = pm.id

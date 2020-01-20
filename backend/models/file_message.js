@@ -14,7 +14,7 @@ class FileMessage {
     link: string;
 
     constructor(fileName: string, fileType: string, fileSize: string, link: string, text: string,
-                userName: string, messageType: string, timeStamp: Date = new Date(),
+                userName: string, messageType: string, timeStamp: Date,
                 roomId: number, id?:number) {
         this.text = text;
         this.userName = userName;

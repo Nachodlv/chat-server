@@ -7,7 +7,7 @@ class Message {
     roomId: number;
 
     constructor(text: string, userName: string, messageType: string,
-                timeStamp: Date = new Date(), roomId: number, id?:number) {
+                timeStamp: Date, roomId: number, id?:number) {
         this.text = text;
         this.userName = userName;
         this.messageType = messageType;

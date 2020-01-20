@@ -39,7 +39,8 @@ function populateHTML(user: User, group: ChatRoom) {
         '<p>This is the beginning of the group chat history</p>' +
         '</div>' +
         '</li>');
-    group.messages.forEach(msg => {
+    group.messages.sort((a, b) => new Date(a.timeStamp).getTime() - new Date(b.timeStamp).getTime())
+        .forEach(msg => {
         const isAuthor = msg.userName === user.name;
         switch (msg.messageType) {
             case MessageType.UserMessage:

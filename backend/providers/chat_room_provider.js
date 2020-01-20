@@ -177,9 +177,9 @@ class ChatRoomProvider {
         const messages = messageRows.map( row => {
             const type = row[4];
             if (type === this.MessageType.Multimedia) {
-                new this.FileMessage(row[6], row[7], row[8], row[9], row[1], row[2], type, new Date(row[3]), Number(row[5]), Number(row[0]))
+                return new this.FileMessage(row[6], row[7], row[8], row[9], row[1], row[2], type, new Date(row[3]), Number(row[5]), Number(row[0]))
             } else {
-                new this.Message(row[1], row[2], type, new Date(row[3]), Number(row[5]), Number(row[0]))
+                return new this.Message(row[1], row[2], type, new Date(row[3]), Number(row[5]), Number(row[0]))
             }
         });
         return new this.ChatRoom(name, ownerId, id, users, messages);
@@ -187,7 +187,7 @@ class ChatRoomProvider {
 
     chatRoomsTableToModels(rows: any[], messageRows: any[] = []): ChatRoom[] {
         const groupedRows: any = this.groupBy(rows, 0);
-        const groupedMessages: any = this.groupBy(messageRows, 2);
+        const groupedMessages: any = this.groupBy(messageRows, 5);
         let result = [];
         Object.keys(groupedRows).forEach(key => {
             const data = groupedRows[key];

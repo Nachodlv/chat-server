@@ -105,7 +105,7 @@ class UserController {
         this.app.post('/register', (req, res) => {
             const user = req.body;
             this.validateImage(user.imgPath, req.headers.origin, (isValid, status) => {
-                if (isValid) {
+                if (!isValid) {
                     this.encryptionService.hashPassword(user.password, (hashedPassword) => {
                         if(hashedPassword === undefined) {
                             res.status(500);
