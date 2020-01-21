@@ -40,7 +40,8 @@ function onSubmit(): void {
             return false;
         }
         const file = $('input[type="file"]')[0].files[0];
-        saveImage(file, nickname, pass);
+        registerUser(nickname, pass, file);
+        // saveImage(file, nickname, pass);
         return false;
     });
 }
@@ -69,7 +70,7 @@ function onLoginClick() {
     });
 }
 
-function saveImage(file, nickname, pass): void {
+/*function saveImage(file, nickname, pass): void {
     // TODO see if we can save images in ibm or google cloud
     const formData = new FormData();
     formData.append('avatar', file);
@@ -88,21 +89,43 @@ function saveImage(file, nickname, pass): void {
             showError('An error has occurred. Please try again later.');
         }
     });
-}
+}*/
 
 /*
 * Make a post to '/login'. It attaches to the body an user with the nickname specified in the parameters of the
 * function.
 * If the post fails it will show an error in the html specifying the error.
 * */
-function registerUser(nickname, pass, path): void {
+/*function registerUser(nickname, pass, imageBuffer): void {
     $.ajax({
         type: "POST",
         beforeSend: function(request) {
             request.setRequestHeader("Content-Type", "application/json");
         },
         url: "/register",
-        data: JSON.stringify(new User(nickname, pass, path)),
+        data: JSON.stringify({user: new User(nickname, pass), imageBuffer}),
+        processData: false,
+        success: function(msg) {
+            CookieService.setCookie("userId", JSON.parse(msg).id, 1);
+            window.location.href = '/';
+        },
+        error: function (xhr) {
+            if(xhr.status === 409) showError('The username is already in use.');
+            else if(xhr.status === 403) showError(xhr.responseText);
+            else showError('An error has occurred. Please try again later.');
+        }
+    });
+}*/
+function registerUser(nickname, pass, file): void {
+    const formData = new FormData();
+    formData.append('imageFile', file);
+    formData.append('user', JSON.stringify(new User(nickname, pass)));
+    $.ajax({
+        type: "POST",
+        url: "/register",
+        data: formData,
+        cache: false,
+        contentType: false,
         processData: false,
         success: function(msg) {
             CookieService.setCookie("userId", JSON.parse(msg).id, 1);

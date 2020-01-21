@@ -7,6 +7,7 @@ const http = require('http');
 const fs = require('fs');
 const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 const skipper = require('skipper');
 const requestLib = require('request');
@@ -61,7 +62,16 @@ if (!local) {
 }
 
 
-app.use(bodyParser.json());
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(fileUpload({
+    limits: {
+        fileSize: 1 * 1024 * 1024,
+        fields: 50,
+        files: 1,
+        parts: 51,
+    }
+}));
 app.use(cookieParser());
 app.use(skipper());
 app.use(express.static(__dirname + '/frontend/'));
@@ -84,6 +94,10 @@ const ChatRoom = require('./backend/models/chat_room.js');
 const dataBaseConnection = new (require('./database.js'))(requestLib);
 const translatorService = new (require('./backend/services/translator_service.js'))(requestLib);
 const encryptionService = new (require('./backend/services/encryption_service.js'))(bCrypt);
+const OBJSTORAGECRED = require('../certificates/object_storage_credentials.json');
+const IBMCOS = require('ibm-cos-sdk');
+const rp = require('request-promise');
+const objectStorageService = new (require('./backend/services/object_storage_service.js'))(OBJSTORAGECRED, IBMCOS, rp, encryptionService);
 
 dataBaseConnection.connect((token, _) => {
     const authHeader = {
@@ -96,7 +110,7 @@ dataBaseConnection.connect((token, _) => {
     const roomProvider = new ChatRoomProvider(ChatRoom, User, Message, FileMessage, MessageType, db2Service);
     const privateMessageProvider = new PrivateMessageProvider(PrivateMessage, PrivateFileMessage, MessageType, db2Service);
 
-    const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname, requestLib, encryptionService, fs);
+    const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname, requestLib, objectStorageService, encryptionService, fs);
     const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessageProvider, __dirname);
 
     const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider, translatorService);

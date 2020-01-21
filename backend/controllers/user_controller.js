@@ -5,17 +5,19 @@ class UserController {
     dirname: string;
     userProvider: UserProvider;
     encryptionService: EncryptionService;
-    constructor(app, userProvider: UserProvider, dirname: string, requestLib, encryptionService, fs) {
+    objectStorageService: ObjectStorageService;
+    constructor(app, userProvider: UserProvider, dirname: string, requestLib, objectStorageService: ObjectStorageService, encryptionService, fs) {
         this.app = app;
         this.userProvider = userProvider;
         this.dirname = dirname;
         this.request = requestLib;
+        this.objectStorageService = objectStorageService;
         this.encryptionService = encryptionService;
         this.fs = fs;
         this.loginView();
         this.registerView();
         this.loginUser();
-        this.saveUserImage();
+        // this.saveUserImage();
         this.registerUser();
         this.getUser();
         this.getImage();
@@ -69,7 +71,7 @@ class UserController {
         });
     }
 
-    saveUserImage() {
+    /*saveUserImage() {
         this.app.post('/save-image', (req, res) => {
             req.file('avatar').upload((err, uploadedFiles) => {
                 if (err) return res.send(500, err);
@@ -79,34 +81,53 @@ class UserController {
                 });
             });
         });
-    }
+    }*/
 
-    getUserImage(path, id) {
+    /*getUserImage(path, id) {
         this.app.get('/user-image/' + id, (req, res) => {
             res.sendFile(path);
         });
-    }
+    }*/
 
     getImage() {
         this.app.get('/image/:imagePath', (req, res) => {
-           res.sendFile(req.params['imagePath']);
+           this.objectStorageService.getObject(req.params['imagePath'], (data: any, error) => {
+               if (error) {
+                   res.status(500);
+                   res.send(error);
+               } else {
+                   res.status(200);
+                   res.send(data.Body);
+               }
+           })
         });
     }
 
-    validateImage(path, origin, callback) {
-        const id = path.substring(path.lastIndexOf('/') + 1);
-        this.getUserImage(path, id);
-        this.request({url: 'https://eu-de.functions.cloud.ibm.com/api/v1/web/7e9d533d-cf28-46d0-8942-ce49cc1cfd0e/visual-recog-actions/clasify-image', qs:{url: origin + '/user-image/' + id}}, (error, response, body) => {
-            callback(!error && response.statusCode === 200 && JSON.parse(response.body).array.length, response.statusCode)
-        });
+    validateImage(imageBuffer, callback) {
+        // const id = path.substring(path.lastIndexOf('/') + 1);
+        // this.getUserImage(path, id);
+        this.request.post(
+            {
+                url: 'https://eu-de.functions.cloud.ibm.com/api/v1/web/7e9d533d-cf28-46d0-8942-ce49cc1cfd0e/visual-recog-actions/clasify-image',
+                body: {imageString: imageBuffer},
+                json: true},
+            (error, response, body) => {
+                callback(!error && response.statusCode === 200 && response.body.array.length, response.statusCode)
+            });
+    }
+
+    saveImage(userName, fileName, fileType, fileSize, imageBuffer, callback: (fileKey: string, error) => void) {
+        this.objectStorageService.putObject(userName, fileName, fileType, fileSize, imageBuffer, (result, error) => {
+            callback(result, error)
+        })
     }
 
     registerUser() {
         this.app.post('/register', (req, res) => {
-            const user = req.body;
-            this.validateImage(user.imgPath, req.headers.origin, (isValid, status) => {
-                // TODO change back to isValid
-                if (!isValid) {
+            const user = JSON.parse(req.body.user);
+            const file = req.files.imageFile;
+            this.validateImage(file.data, (isValid, status) => {
+                if (isValid) {
                     this.encryptionService.hashPassword(user.password, (hashedPassword) => {
                         if(hashedPassword === undefined) {
                             res.status(500);
@@ -120,13 +141,21 @@ class UserController {
                                 res.send('Nickname already in use');
                                 return;
                             }
-                            this.userProvider.createUser(user, (newUser, error) => {
-                                if(newUser !== undefined) {
-                                    res.status(200);
-                                    res.send(JSON.stringify(newUser));
-                                } else {
+                            this.saveImage(user.name, file.name, file.mimetype, file.size, file.data, (fileKey, error1) => {
+                                if (error1) {
                                     res.status(500);
-                                    res.send(error);
+                                    res.send(error1);
+                                } else {
+                                    user.imgPath = fileKey;
+                                    this.userProvider.createUser(user, (newUser, error2) => {
+                                        if(newUser !== undefined) {
+                                            res.status(200);
+                                            res.send(JSON.stringify(newUser));
+                                        } else {
+                                            res.status(500);
+                                            res.send(error2);
+                                        }
+                                    });
                                 }
                             });
                         });
@@ -139,14 +168,12 @@ class UserController {
                         res.status(500);
                         res.send('Internal Server Error');
                     }
-                    console.log('GIANNIIIIIII: ' + user.imgPath);
-                    this.removeFile(user.imgPath);
                 }
             });
         });
     };
 
-    removeFile(path) {
+    /*removeFile(path) {
         this.fs.unlink(path, (err) => {
             if (err) {
                 console.error(err);
@@ -154,7 +181,7 @@ class UserController {
             }
             //file removed
         })
-    }
+    }*/
 
     /*
     * Returns the user with the id provided in the url.

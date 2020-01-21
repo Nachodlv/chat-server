@@ -16,6 +16,16 @@ class EncryptionService {
         });
     }
 
+    hashFileName(fileName: string, result: (string) => void) {
+        this.bCrypt.hash(fileName, this.saltRounds, function (err, hash) {
+            if (err === undefined && hash !== undefined) result(hash);
+            else {
+                console.log("Error hashing the fileName.\n" + err);
+                result(undefined);
+            }
+        });
+    }
+
     comparePassword(password: string, hash: string, result: (boolean) => void) {
         this.bCrypt.compare(password, hash, function(err, res) {
             if (err === undefined && res !== undefined) result(res);
