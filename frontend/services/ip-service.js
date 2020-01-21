@@ -5,7 +5,7 @@ export class IpService {
     constructor(ip: string = undefined) {
         this.ip = ip;
         this.id = undefined;
-        this.ipExternalService = "https://mini-etcd.eu-de.mybluemix.net/"; //TODO change me
+        this.ipExternalService = "https://localhost:1234"; //TODO change me
     }
 
     getIp(success: (string) => void, error: (string) => void) {
@@ -15,31 +15,12 @@ export class IpService {
 
     getId(success: (number) => void, error: (string) => void) {
         if(this.id) success(this.id);
-        else this.idRequest(success, error)
+        else this.makeRequest((_, id) => success(id), error)
     }
 
     getIpAndId(success: (string, number) => void, error: (string) => void) {
         if(this.id && this.ip) success(this.ip, this.ip);
         else this.makeRequest(success, error);
-    }
-
-    idRequest(success: (number) => void, error:(string) => void) {
-        $.ajax({
-            type: "GET",
-            beforeSend: (request) => {
-                request.setRequestHeader("Access-Control-Allow-Origin", "*");
-                request.withCredentials = true;
-            },
-            url: this.ipExternalService + "/id",
-            processData: false,
-            success: (msg) => {
-                this.id = msg;
-                success(this.id);
-            },
-            error: () => {
-                error("Something went wrong");
-            }
-        });
     }
 
     makeRequest(success: (string, number) => void, error: (string) => void) {
@@ -52,7 +33,7 @@ export class IpService {
             url: this.ipExternalService + "/ip",
             processData: false,
             success: (msg) => {
-                this.ip = msg.ip;
+                this.ip = "https://" + msg.ip + (msg.port? `:${msg.port}`:"");
                 this.id = msg.id;
 
                 success(this.ip, this.id);

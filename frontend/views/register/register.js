@@ -6,21 +6,34 @@
 import User from "../../models/user.js";
 import {CookieService} from "../../services/cookie-service.js";
 import {AuthService} from "../../services/auth-service.js";
+import {IpService} from "../../services/ip-service.js";
+
+const ipService = new IpService();
 
 /*
 * Function that executes when the file is imported in login.html
 * Check if a user is logged in.
 * */
 $(function () {
-    AuthService.isAuthorized(() => {
-        window.location.href = '/';
-    }, initRegister)
+    initRegister()
 });
 
 function initRegister() {
-    onSubmit();
-    onImageSelect();
-    onLoginClick();
+    ipService.getId((id) => {
+        AuthService.isAuthorized(() => {
+            window.location.href = '/';
+        }, () => {
+            setId(id);
+            onSubmit();
+            onImageSelect();
+            onLoginClick();
+        });
+
+    }, (error) => console.log(error));
+}
+
+function setId(id: string):void {
+    $('#instance_id')[0].innerHTML = `ID: ${id}`;
 }
 
 /*
@@ -100,6 +113,8 @@ function registerUser(nickname, pass, path): void {
         type: "POST",
         beforeSend: function(request) {
             request.setRequestHeader("Content-Type", "application/json");
+            // request.setRequestHeader("Access-Control-Allow-Origin", "*");
+            // request.withCredentials = true;
         },
         url: "/register",
         data: JSON.stringify(new User(nickname, pass, path)),

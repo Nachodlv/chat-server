@@ -6,12 +6,13 @@ import {addChatList, onUserStatusChange} from "./user-list/user_list.js";
 /*
 * Function that initializes the message received listeners.
 * */
-export function chatInit(socket, user, groups: ChatRoom[], serverSocket) {
+export function chatInit(socket, user, groups: ChatRoom[], serverSocket, id) {
     onMessageReceived(socket, user, groups);
     onFileMessageReceived(socket, user, groups);
     onServerMessage(socket, groups);
     onPrivateMessage(serverSocket, groups, user);
     onPrivateFileMessage(serverSocket, groups, user);
+    setInstanceId(id);
 }
 
 /*
@@ -24,6 +25,10 @@ export function onGroupSelected(socket, user, group: ChatRoom, serverSocket) {
     populateHTML(user, group);
     showUserInvite();
     showMessageBar();
+}
+
+function setInstanceId(id: string) {
+    $('#instance-id').innerHTML[0] = `ID: ${id}`;
 }
 
 /*
