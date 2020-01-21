@@ -3,12 +3,6 @@ class UserProvider {
     constructor(User, db2Service: Db2Service) {
         this.User = User;
         this.db2Service = db2Service;
-        //TEST
-        /*this.createUser(new User(
-            ["", "Pepe", "false","password123", "/Users/gianni/Projects/facultad/cloud-computing/chat-server-2/.tmp/uploads/24bd52ba-e6b6-4058-bc2e-defaf2ed850b.jpg"]
-        ), (newUser, error) => {
-            console.log(newUser)
-        })*/
     }
 
     getUser(name: string, callback: (user: User, error: string) => void) {

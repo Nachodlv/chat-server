@@ -71,24 +71,6 @@ class UserController {
         });
     }
 
-    /*saveUserImage() {
-        this.app.post('/save-image', (req, res) => {
-            req.file('avatar').upload((err, uploadedFiles) => {
-                if (err) return res.send(500, err);
-                return res.json({
-                    message: uploadedFiles.length + ' file(s) uploaded successfully!',
-                    files: uploadedFiles
-                });
-            });
-        });
-    }*/
-
-    /*getUserImage(path, id) {
-        this.app.get('/user-image/' + id, (req, res) => {
-            res.sendFile(path);
-        });
-    }*/
-
     getImage() {
         this.app.get('/image/:imagePath', (req, res) => {
            this.objectStorageService.getObject(req.params['imagePath'], (data: any, error) => {
@@ -104,8 +86,6 @@ class UserController {
     }
 
     validateImage(imageBuffer, callback) {
-        // const id = path.substring(path.lastIndexOf('/') + 1);
-        // this.getUserImage(path, id);
         this.request.post(
             {
                 url: 'https://eu-de.functions.cloud.ibm.com/api/v1/web/7e9d533d-cf28-46d0-8942-ce49cc1cfd0e/visual-recog-actions/clasify-image',
@@ -154,6 +134,7 @@ class UserController {
                                         } else {
                                             res.status(500);
                                             res.send(error2);
+                                            //TODO delete image from bucket
                                         }
                                     });
                                 }

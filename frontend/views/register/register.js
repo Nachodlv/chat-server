@@ -69,53 +69,6 @@ function onLoginClick() {
         window.location.href = '/login';
     });
 }
-
-/*function saveImage(file, nickname, pass): void {
-    // TODO see if we can save images in ibm or google cloud
-    const formData = new FormData();
-    formData.append('avatar', file);
-    $.ajax({
-        type: "POST",
-        url: "/save-image",
-        data: formData,
-        cache: false,
-        contentType: false,
-        processData: false,
-        success: (msg) => {
-            const path = msg.files[0].fd;
-            registerUser(nickname, pass, path)
-        },
-        error: (xhr) => {
-            showError('An error has occurred. Please try again later.');
-        }
-    });
-}*/
-
-/*
-* Make a post to '/login'. It attaches to the body an user with the nickname specified in the parameters of the
-* function.
-* If the post fails it will show an error in the html specifying the error.
-* */
-/*function registerUser(nickname, pass, imageBuffer): void {
-    $.ajax({
-        type: "POST",
-        beforeSend: function(request) {
-            request.setRequestHeader("Content-Type", "application/json");
-        },
-        url: "/register",
-        data: JSON.stringify({user: new User(nickname, pass), imageBuffer}),
-        processData: false,
-        success: function(msg) {
-            CookieService.setCookie("userId", JSON.parse(msg).id, 1);
-            window.location.href = '/';
-        },
-        error: function (xhr) {
-            if(xhr.status === 409) showError('The username is already in use.');
-            else if(xhr.status === 403) showError(xhr.responseText);
-            else showError('An error has occurred. Please try again later.');
-        }
-    });
-}*/
 function registerUser(nickname, pass, file): void {
     const formData = new FormData();
     formData.append('imageFile', file);

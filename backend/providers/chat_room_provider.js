@@ -7,22 +7,6 @@ class ChatRoomProvider {
         this.FileMessage = FileMessage;
         this.MessageType = MessageType;
         this.db2Service = db2Service;
-
-        //TEST
-        /*this.createChatRoom(new ChatRoom("LD", 1), (room, _) => {
-            console.log(room);
-            this.getChatRoomById(room.id, (newRoom, _) => {
-                console.log(newRoom)
-            })
-        });
-
-        this.getChatRoomById(2, (room, _) => {
-            console.log(room);
-        });
-
-        this.getChatRoomsByIds([2,3,4], (rooms, _) => {
-            console.log(rooms);
-        });*/
     }
 
     getChatRoomById(id: number, callback: (chatRoom: ChatRoom, error: string) => void) {
