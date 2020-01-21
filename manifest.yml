@@ -1,6 +1,6 @@
 ---
 applications:
 - name: clever-kepler
-  memory: 512M
-  instances: 1
+  memory: 400M
+  instances: 3
 

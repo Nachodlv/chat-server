@@ -9,6 +9,7 @@ import {chatInit} from "./chat.js";
 import {addInviteUserInput} from "./invite-user/invite_user.js";
 import {addLogoutButton} from "./logout-button/logout_button.js";
 
+
 /*
 * Function that is called when the file is imported.
 * Checks if a user is logged in, if not it redirects them to the login page.
@@ -27,8 +28,10 @@ $(function () {
 * It initializes the group list, and then the group chat and invite user input
 * */
 function init(user: User) {
-    const serverSocket = io('/', {query: "userId=" + user.id});
-    const chatSocket = io('/chat-room');
+    const serverSocket = io('/', {query: "userId=" + user.id,  transports: [ 'websocket' ]});
+    const chatSocket = io('/chat-room', {
+        transports: [ 'websocket' ] // or [ 'websocket', 'polling' ], which is the same thing
+    });
     user.chatRooms.forEach(roomId => chatSocket.emit('join', roomId));
     groupListInit(chatSocket, serverSocket, user, (groups) => {
         chatInit(chatSocket, user, groups, serverSocket);

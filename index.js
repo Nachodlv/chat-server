@@ -1,16 +1,22 @@
 require('dotenv').config();
 
+const host = process.env.CF_INSTANCE_ADDR || "https://localhost:1234";
 const express = require('express');
 const app = express();
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
-const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const skipper = require('skipper');
 const requestLib = require('request');
 const bCrypt = require('bcrypt');
+var session = require('express-session');
+
+const port = process.argv[3]? process.argv[3].split('--port=')[1] : process.env.PORT || 3000;
+const cors = require('cors');
+app.use(cors());
+app.options('*', cors());
 
 
 const local: boolean = process.argv[2] === 'local';
@@ -67,6 +73,25 @@ app.use(skipper());
 app.use(express.static(__dirname + '/frontend/'));
 app.use(express.static(__dirname + '/frontend/views/'));
 app.use(require('helmet')());
+
+const redisSocket = require('socket.io-redis');
+io.adapter(redisSocket({ host: '184.172.214.68', port: 31011 }));
+
+// app.use(cookieSession({
+//     name: 'jsessionid',
+//     keys: ['ch@4tr00m'],
+//
+//     // Cookie Options
+//     maxAge: 24 * 60 * 60 * 1000 // 24 hours
+// }));
+
+app.use(session({
+    secret: 'ch@4tr00m',
+    name: 'jsessionid',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }
+}));
 
 const Provider = require('./backend/providers/provider.js');
 const UserProvider = require('./backend/providers/user_provider.js');
