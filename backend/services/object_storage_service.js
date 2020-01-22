@@ -5,7 +5,7 @@ class ObjectStorageService {
     IBMCOS: any;
     rp: any;
     encryptionService: EncryptionService;
-    S3: any = undefined;
+    S3: any;
 
     constructor(OBJSTORAGECRED, IBMCOS, rp, encryptionService) {
         this.CONFIG = {
