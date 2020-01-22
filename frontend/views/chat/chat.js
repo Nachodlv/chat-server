@@ -12,7 +12,6 @@ export function chatInit(socket, user, groups: ChatRoom[], serverSocket, id) {
     onServerMessage(socket, groups);
     onPrivateMessage(serverSocket, groups, user);
     onPrivateFileMessage(serverSocket, groups, user);
-    setInstanceId(id);
 }
 
 /*
@@ -25,10 +24,6 @@ export function onGroupSelected(socket, user, group: ChatRoom, serverSocket) {
     populateHTML(user, group);
     showUserInvite();
     showMessageBar();
-}
-
-function setInstanceId(id: string) {
-    $('#instance-id')[0].innerHTML = `ID: ${id}`;
 }
 
 /*

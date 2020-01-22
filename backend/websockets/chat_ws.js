@@ -25,6 +25,7 @@ class ChatWebSocket {
     * */
     assignCallbacks() {
         this.namespace.on('connection', (socket) => {
+            socket.emit('id', process.env.CF_INSTANCE_GUID || 'local');
             this.onJoin(socket);
             this.onMessage(socket);
             this.onServerMessage(socket);

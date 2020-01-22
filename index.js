@@ -11,7 +11,7 @@ const cookieParser = require('cookie-parser');
 const skipper = require('skipper');
 const requestLib = require('request');
 const bCrypt = require('bcrypt');
-var session = require('express-session');
+const session = require('express-session');
 
 const port = process.argv[3]? process.argv[3].split('--port=')[1] : process.env.PORT || 3000;
 const cors = require('cors');

@@ -70,6 +70,9 @@ function initChatRoomView(user, chatSocket, serverSocket, id) {
     chatSocket.on('disconnect', function () {
         chatInterval = setInterval(() => tryReconnect(reconnectionCount, chatInterval, user, chatSocket, serverSocket, id), 5000);
     });
+    chatSocket.on('id', (id) => {
+        setInstanceId(id);
+    });
     user.chatRooms.forEach(roomId => chatSocket.emit('join', roomId));
 
     groupListInit(chatSocket, serverSocket, user, (groups) => {
@@ -78,3 +81,8 @@ function initChatRoomView(user, chatSocket, serverSocket, id) {
         addLogoutButton(serverSocket, chatSocket);
     });
 }
+
+function setInstanceId(id: string) {
+    $('#instance-id')[0].innerHTML = `ID: ${id}`;
+}
+
