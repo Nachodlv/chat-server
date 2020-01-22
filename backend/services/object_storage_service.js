@@ -18,7 +18,7 @@ class ObjectStorageService {
         this.encryptionService = encryptionService;
     }
 
-    init = async () => {
+    async init() {
 
         const defaultEndpoint = 's3.us-south.cloud-object-storage.appdomain.cloud';
 
@@ -46,7 +46,7 @@ class ObjectStorageService {
 
 
 
-    getS3 = async (endpoint, serviceCredential) => {
+    async getS3(endpoint, serviceCredential) {
         let s3Options;
 
         if (serviceCredential.apikey) {
@@ -75,7 +75,7 @@ class ObjectStorageService {
      * Each AZ will require a different endpoint to access the data in it.
      * The endpoints url provides a JSON consisting of all Endpoints for the user.
      */
-    getEndpoints = async (endpointsUrl) => {
+    async getEndpoints(endpointsUrl) {
         console.info('======= Getting Endpoints =========');
 
         const options = {
@@ -90,7 +90,7 @@ class ObjectStorageService {
      * Once we have the available endpoints, we need to extract the endpoint we need to use.
      * This method uses the bucket's LocationConstraint to determine which endpoint to use.
      */
-    findBucketEndpoint = (bucket, endpoints) => {
+    findBucketEndpoint(bucket, endpoints) {
         const region = bucket.region || bucket.LocationConstraint.substring(0, bucket.LocationConstraint.lastIndexOf('-'));
         const serviceEndpoints = endpoints['service-endpoints'];
         const regionUrls = serviceEndpoints['cross-region'][region]
@@ -107,7 +107,7 @@ class ObjectStorageService {
      * The listBucketsExtended S3 call will return a list of buckets along with the LocationConstraint.
      * This will help in identifing the endpoint that needs to be used for a given bucket.
      */
-    listBuckets = async (s3, bucketName) => {
+    async listBuckets(s3, bucketName) {
         const params = {
             Prefix: bucketName
         };
@@ -140,7 +140,7 @@ class ObjectStorageService {
         });
     }
 
-    putObjectAsync = async (s3, fileKey: string, fileType: string, fileSize: string, body: any) => {
+    async putObjectAsync(s3, fileKey: string, fileType: string, fileSize: string, body: any) {
         const params = {
             Bucket: this.CONFIG.bucketName,
             Key: fileKey,
@@ -176,7 +176,7 @@ class ObjectStorageService {
         }
     }
 
-    getObjectAsync = async (s3, bucketName, fileKey) => {
+    async getObjectAsync(s3, bucketName, fileKey) {
         const getObjectParam = {
             Bucket: bucketName,
             Key: fileKey
@@ -204,7 +204,7 @@ class ObjectStorageService {
         }
     }
 
-    deleteObjectAsync = async (s3, bucketName, objectName) => {
+    async deleteObjectAsync(s3, bucketName, objectName) {
         const deleteObjectP = {
             Bucket: bucketName,
             Key: objectName
