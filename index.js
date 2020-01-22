@@ -1,6 +1,5 @@
 require('dotenv').config();
 
-const host = process.env.CF_INSTANCE_ADDR || "https://localhost:1234";
 const express = require('express');
 const app = express();
 const https = require('https');
@@ -77,13 +76,6 @@ app.use(require('helmet')());
 const redisSocket = require('socket.io-redis');
 io.adapter(redisSocket({ host: '184.172.214.68', port: 31011 }));
 
-// app.use(cookieSession({
-//     name: 'jsessionid',
-//     keys: ['ch@4tr00m'],
-//
-//     // Cookie Options
-//     maxAge: 24 * 60 * 60 * 1000 // 24 hours
-// }));
 
 app.use(session({
     secret: 'ch@4tr00m',
@@ -123,6 +115,7 @@ dataBaseConnection.connect((token, _) => {
 
     const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname, requestLib, encryptionService, fs);
     const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessageProvider, __dirname);
+    const idController = new(require('./backend/controllers/id_controller.js'))(app);
 
     const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider, translatorService);
     const onlineWs = new (require('./backend/websockets/online_ws.js'))(io, userProvider, Message, MessageType, chatWs);

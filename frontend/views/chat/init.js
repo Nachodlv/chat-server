@@ -8,7 +8,7 @@ import {groupListInit} from "./group-list/group_list.js";
 import {chatInit} from "./chat.js";
 import {addInviteUserInput} from "./invite-user/invite_user.js";
 import {addLogoutButton} from "./logout-button/logout_button.js";
-import {IpService} from "../../services/ip-service.js";
+import {IdService} from "../../services/id-service.js";
 
 
 /*
@@ -29,9 +29,9 @@ $(function () {
 * It initializes the group list, and then the group chat and invite user input
 * */
 function init(user: User) {
-    const ipService = new IpService();
+    const idService = new IdService();
 
-    ipService.getId((id) => {
+    idService.getId((id) => {
         const serverSocket = io('/', {query: "userId=" + user.id,  transports: [ 'websocket' ]});
         const chatSocket = io('/chat-room', {
             transports: [ 'websocket' ] // or [ 'websocket', 'polling' ], which is the same thing

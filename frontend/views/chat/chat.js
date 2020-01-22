@@ -28,7 +28,7 @@ export function onGroupSelected(socket, user, group: ChatRoom, serverSocket) {
 }
 
 function setInstanceId(id: string) {
-    $('#instance-id').innerHTML[0] = `ID: ${id}`;
+    $('#instance-id')[0].innerHTML = `ID: ${id}`;
 }
 
 /*

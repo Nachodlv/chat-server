@@ -6,9 +6,9 @@
 import User from "../../models/user.js";
 import {CookieService} from "../../services/cookie-service.js";
 import {AuthService} from "../../services/auth-service.js";
-import {IpService} from "../../services/ip-service.js";
+import {IdService} from "../../services/id-service.js";
 
-const ipService = new IpService();
+const idService = new IdService();
 
 /*
 * Function that executes when the file is imported in login.html
@@ -19,7 +19,7 @@ $(function () {
 });
 
 function initRegister() {
-    ipService.getId((id) => {
+    idService.getId((id) => {
         AuthService.isAuthorized(() => {
             window.location.href = '/';
         }, () => {
