@@ -122,8 +122,8 @@ class ObjectStorageService {
      * A simple putObject to upload a simple object to COS.
      * COS also allows Multipart upload to facilitate upload of larger objects.
      */
-    putObject(userName: string, fileName: string, fileType: string, fileSize: string, body: any, callback: (result: any, error) => void){
-        this.encryptionService.hashFileName(userName+fileName, (fileKey) => {
+    putObject(encryptionKey: string, fileName: string, fileType: string, fileSize: string, body: any, callback: (result: any, error) => void){
+        this.encryptionService.hashFileName(encryptionKey+fileName, (fileKey) => {
             if (fileKey === undefined){
                 callback(undefined, "Error hashing the file name.")
             } else if(this.S3) {
@@ -132,7 +132,7 @@ class ObjectStorageService {
                 }).catch(err => callback(undefined, err))
             } else {
                 this.init().then(() => {
-                    this.putObjectAsync(this.S3, fileName, fileType, fileSize, body).then( data => {
+                    this.putObjectAsync(this.S3, fileKey, fileType, fileSize, body).then( data => {
                         callback(fileKey)
                     })
                 }).catch(err => callback(undefined, err))
@@ -147,7 +147,7 @@ class ObjectStorageService {
             Body: body,
             Metadata: {
                 fileType: fileType,
-                fileSize: fileSize.toString()
+                fileSize: fileSize
             }
         };
         console.info(' putting Object \n', params.Key);
@@ -183,9 +183,8 @@ class ObjectStorageService {
         };
         console.info(' getObject \n', getObjectParam);
 
-        const data = await s3.getObject(getObjectParam).promise();
-        console.info(' Response: \n', JSON.stringify(data, null, 2));
-        return data;
+        return await s3.getObject(getObjectParam).promise();
+        // console.info(' Response: \n', JSON.stringify(data, null, 2));
     };
 
     /*

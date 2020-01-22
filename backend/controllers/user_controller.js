@@ -79,7 +79,7 @@ class UserController {
                    res.send(error);
                } else {
                    res.status(200);
-                   res.send(data.Body);
+                   res.send(data.Body)
                }
            })
         });
@@ -121,7 +121,7 @@ class UserController {
                                 res.send('Nickname already in use');
                                 return;
                             }
-                            this.saveImage(user.name, file.name, file.mimetype, file.size, file.data, (fileKey, error1) => {
+                            this.saveImage(user.name, file.name, file.mimetype, file.size.toString(), file.data, (fileKey, error1) => {
                                 if (error1) {
                                     res.status(500);
                                     res.send(error1);

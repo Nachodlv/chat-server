@@ -19,7 +19,7 @@ class UserProvider {
 
     createUser(user: User, callback: (user: User, error: string) => void) {
         this.db2Service.executeSql(`SELECT ID FROM FINAL TABLE (INSERT INTO QQL85939.USER (NAME, PASSWORD, ONLINE, IMGPATH) 
-                                VALUES ('${user.name}', '${user.password}', ${user.online}, '${user.imgPath};'))`,
+                                VALUES ('${user.name}', '${user.password}', ${user.online}, '${user.imgPath}'))`,
             (body, error) => {
                 if(body.results.length > 0 && body.results[0].rows.length > 0) {
                     user.id = Number(body.results[0].rows[0][0]);

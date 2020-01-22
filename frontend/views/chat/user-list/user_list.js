@@ -44,11 +44,11 @@ function getIconClass(status: boolean): string {
     return `material-icons online-icon ${status ? 'online' : 'offline'} user-status`;
 }
 
-function getImageId(imgPath: string): string {
+/*function getImageId(imgPath: string): string {
     return imgPath.substring(0, imgPath.length - 1).replace(/\//g, "%2F");
-}
+}*/
 
 function getUserImage(user: User): string {
-    return `<img height="60" data-placement="left" src="${window.location.href}image/${getImageId(user.imgPath)}">`;
+    return `<img height="60" data-placement="left" src="${window.location.href}image/${encodeURIComponent(user.imgPath)}">`;
 }
 

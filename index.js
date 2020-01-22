@@ -113,10 +113,10 @@ dataBaseConnection.connect((token, _) => {
     const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname, requestLib, objectStorageService, encryptionService, fs);
     const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessageProvider, __dirname);
 
-    const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, roomProvider, translatorService);
+    const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, MessageType, roomProvider, objectStorageService, translatorService);
     const onlineWs = new (require('./backend/websockets/online_ws.js'))(io, userProvider, Message, MessageType, chatWs);
     const chatFunctionsWs = new (require('./backend/websockets/chat_functions_ws.js'))(io, userProvider, roomProvider, Message, chatWs, MessageType);
-    const privateMessagesWs = new (require('./backend/websockets/private_messages_ws.js'))(io, privateMessageProvider, roomProvider, translatorService);
+    const privateMessagesWs = new (require('./backend/websockets/private_messages_ws.js'))(io, MessageType, privateMessageProvider, roomProvider, objectStorageService, translatorService);
 });
 
 

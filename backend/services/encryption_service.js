@@ -17,7 +17,7 @@ class EncryptionService {
     }
 
     hashFileName(fileName: string, result: (string) => void) {
-        this.bCrypt.hash(fileName, this.saltRounds, function (err, hash) {
+        this.bCrypt.hash(fileName, this.saltRounds, (err, hash) => {
             if (err === undefined && hash !== undefined) result(hash);
             else {
                 console.log("Error hashing the fileName.\n" + err);

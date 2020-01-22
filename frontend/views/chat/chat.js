@@ -148,7 +148,7 @@ function onFileMessageSubmit(input, fileInput, socket, user, group, serverSocket
     fileReader.onload = (_) => {
         const arrayBuffer = fileReader.result;
         // TODO change arrayBuffer to cloud storage link
-        const msg = new FileMessage(file.name, file.type, file.size, arrayBuffer, input.val(), user.name,
+        const msg = new FileMessage(file.name, file.type, file.size.toString(), arrayBuffer, input.val(), user.name,
             MessageType.Multimedia, new Date(), group.id);
         group.messages.push(msg);
         input.val('');
@@ -346,17 +346,19 @@ function appendPrivateFileMessage(msg: PrivateFileMessage, isAuthor: boolean) {
 * If the file is an image it appends a preview of such image.
 * */
 function addFileHTML(msg, node){
-    if (msg.fileType.includes('image'))
-        node.append($('<div class="file-container">')
-            .append($(`<a href="${msg.link}" download="${msg.fileName}">`)
-                .append($(`<img src="${msg.link}" alt="">`))));
-    else {
-        node.append($('<div class="file-container row align-items-center">')
-            .append($(`<i class="material-icons">`).text('insert_drive_file'))
-            .append($(`<a href="${msg.link}" download="${msg.fileName}">`).text(msg.fileName)));
-    }
-    node.append($('<p>').text(msg.text))
-        .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
+    getImage(msg.link, (file) => {
+        if (msg.fileType.includes('image'))
+            node.append($('<div class="file-container">')
+                .append($(`<a href="${file}" download="${msg.fileName}">`)
+                    .append($(`<img data-placement="left" src="${file}" alt="">`))));
+        else {
+            node.append($('<div class="file-container row align-items-center">')
+                .append($(`<i class="material-icons">`).text('insert_drive_file'))
+                .append($(`<a href="${file}" download="${msg.fileName}">`).text(msg.fileName)));
+        }
+        node.append($('<p>').text(msg.text))
+            .append($('<p class="time">').text(new Date(msg.timeStamp).toLocaleTimeString('it-IT')));
+    });
 }
 
 /*
@@ -378,6 +380,20 @@ function addPrivateMessageHTML(msg, isAuthor) {
                        </div>
                    </div>` : ''}
                 </div>`);
+}
+
+function getImage(link, onSuccess: (result: any) => void){
+    $.ajax({
+        type: "GET",
+        url: "/image/" + encodeURIComponent(link),
+        processData: false,
+        success: (data) => {
+            onSuccess(data)
+        },
+        error: () => {
+            console.log("Error getting image: "+link)
+        }
+    });
 }
 
 /*
