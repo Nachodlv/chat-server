@@ -32,16 +32,49 @@ function init(user: User) {
     const idService = new IdService();
 
     idService.getId((id) => {
-        const serverSocket = io('/', {query: "userId=" + user.id,  transports: [ 'websocket' ]});
-        const chatSocket = io('/chat-room', {
-            transports: [ 'websocket' ] // or [ 'websocket', 'polling' ], which is the same thing
+        const serverSocket = io.connect('/', {query: "userId=" + user.id,  transports: [ 'websocket' ],  'reconnection': false});
+        const chatSocket = io.connect('/chat-room', {
+            transports: [ 'websocket' ],
+            'reconnection': false
         });
-        user.chatRooms.forEach(roomId => chatSocket.emit('join', roomId));
-        groupListInit(chatSocket, serverSocket, user, (groups) => {
-            chatInit(chatSocket, user, groups, serverSocket, id);
-            addInviteUserInput(serverSocket, groups);
-            addLogoutButton(serverSocket, chatSocket);
-        });
+
+        initChatRoomView(user, chatSocket, serverSocket, id);
     }, () => {console.log("Error getting the ip and the id")})
 
+}
+
+function tryReconnect(reconnectionCount, interval, user, chatSocket, serverSocket, id) {
+    reconnectionCount.count ++;
+    if (reconnectionCount.count >= 50) {
+        clearInterval(interval);
+    }
+    $.ajax('/')
+        .success(function () {
+            chatSocket.open();
+            serverSocket.open();
+            clearInterval(interval);
+            user.chatRooms.forEach(roomId => chatSocket.emit('join', roomId));
+        }).error(function (err) {
+        console.log("http request failed (probably server not up yet)");
+    });
+}
+
+function initChatRoomView(user, chatSocket, serverSocket, id) {
+    const reconnectionCount = {count: 0};
+
+    let serverInterval;
+    let chatInterval;
+    // serverSocket.on('disconnect', function () {
+    //     serverInterval = setInterval(() => tryReconnect(reconnectionCount, serverInterval, serverSocket, user, chatSocket, serverSocket, id), 10000);
+    // });
+    chatSocket.on('disconnect', function () {
+        chatInterval = setInterval(() => tryReconnect(reconnectionCount, chatInterval, user, chatSocket, serverSocket, id), 5000);
+    });
+    user.chatRooms.forEach(roomId => chatSocket.emit('join', roomId));
+
+    groupListInit(chatSocket, serverSocket, user, (groups) => {
+        chatInit(chatSocket, user, groups, serverSocket, id);
+        addInviteUserInput(serverSocket, groups);
+        addLogoutButton(serverSocket, chatSocket);
+    });
 }
