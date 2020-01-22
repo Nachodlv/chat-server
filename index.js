@@ -5,13 +5,18 @@ const app = express();
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
-const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 const skipper = require('skipper');
 const requestLib = require('request');
 const bCrypt = require('bcrypt');
+var session = require('express-session');
+
+const port = process.argv[3]? process.argv[3].split('--port=')[1] : process.env.PORT || 3000;
+const cors = require('cors');
+app.use(cors());
+app.options('*', cors());
 
 
 const local: boolean = process.argv[2] === 'local';
@@ -78,6 +83,18 @@ app.use(express.static(__dirname + '/frontend/'));
 app.use(express.static(__dirname + '/frontend/views/'));
 app.use(require('helmet')());
 
+const redisSocket = require('socket.io-redis');
+io.adapter(redisSocket({ host: '184.172.214.68', port: 31011 }));
+
+
+app.use(session({
+    secret: 'ch@4tr00m',
+    name: 'jsessionid',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }
+}));
+
 const Provider = require('./backend/providers/provider.js');
 const UserProvider = require('./backend/providers/user_provider.js');
 const ChatRoomProvider = require('./backend/providers/chat_room_provider.js');
@@ -112,6 +129,7 @@ dataBaseConnection.connect((token, _) => {
 
     const userController = new (require('./backend/controllers/user_controller.js'))(app, userProvider, __dirname, requestLib, objectStorageService, encryptionService, fs);
     const chatRoomController = new (require('./backend/controllers/chat_room_controller.js'))(app, roomProvider, userProvider, privateMessageProvider, __dirname);
+    const idController = new(require('./backend/controllers/id_controller.js'))(app);
 
     const chatWs = new (require('./backend/websockets/chat_ws.js'))(io, Message, MessageType, roomProvider, objectStorageService, translatorService);
     const onlineWs = new (require('./backend/websockets/online_ws.js'))(io, userProvider, Message, MessageType, chatWs);
