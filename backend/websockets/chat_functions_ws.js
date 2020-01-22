@@ -63,7 +63,7 @@ module.exports = class ChatFunctionWebSocket {
                         fn(user, false);
                         socket.to(user.id).emit('invite', room);
                         this.chatWs.sendMessageToChat(room.id, new this.Message(`${user.name} has joined the group!`,
-                            user.name, this.MessageType.ServerMessage, room.id));
+                            user.name, this.MessageType.ServerMessage, new Date(), room.id));
                         console.log(`${data.nickname} was invited to ${room.name}`)
                     })
 

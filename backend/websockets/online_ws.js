@@ -27,8 +27,7 @@ module.exports = class OnlineWebSocket {
             this.userProvider.getUserById(userId, (user, _) => {
                 socket.join(String(userId));
                 if (user === undefined) return;
-                this.onConnection(user);
-                socket.on('disconnect', () => this.onDisconnect(user));
+                this.onConnection(user, socket);
             });
 
         });
@@ -37,14 +36,16 @@ module.exports = class OnlineWebSocket {
     /*
     * Send a message to the chat rooms the user is part of saying it is connected.
     * */
-    onConnection(user: User) {
+    onConnection(user: User, socket) {
         if (!user) return;
         if (!user.online) {
             this.sendMessageToAllChatRooms(user.name + ' is now online', user.chatRooms, user.name, true);
             console.log(user.name + ' is now online');
         }
         user.online = true;
-        this.userProvider.updateUser(user, () => {});
+        this.userProvider.updateUser(user, () => {
+            socket.on('disconnect', () => this.onDisconnect(user));
+        });
     }
 
     /*
@@ -65,7 +66,7 @@ module.exports = class OnlineWebSocket {
     sendMessageToAllChatRooms(message: string, chatRooms: number[], nickname: string, online: boolean) {
         chatRooms.forEach(chatId =>
             this.chatWs.sendMessageToChat(chatId, new this.Message(message, nickname,
-                online ? this.MessageType.OnlineMessage : this.MessageType.OfflineMessage,
+                online ? this.MessageType.OnlineMessage : this.MessageType.OfflineMessage, new Date(),
                 chatId)));
     }
 
